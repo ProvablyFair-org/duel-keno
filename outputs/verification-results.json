@@ -1,0 +1,161 @@
+{
+  "generatedAt": "2026-06-10T14:14:50.952Z",
+  "totalBets": 5100,
+  "totalSeeds": 106,
+  "datasetHash": {
+    "expected": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9",
+    "actual": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9",
+    "match": true
+  },
+  "configHash": {
+    "expected": "efd3c645c4b3956199fde62dd65446c08e4605763d2d0f34c97a226bdbae4f91",
+    "actual": "efd3c645c4b3956199fde62dd65446c08e4605763d2d0f34c97a226bdbae4f91",
+    "match": true
+  },
+  "steps": [
+    {
+      "step": 1,
+      "name": "Seed Hash Integrity",
+      "status": "PASS",
+      "detail": "102 revealed seeds verified. 3 phase-boundary skips."
+    },
+    {
+      "step": 2,
+      "name": "Next-Seed Promotion (Commitment Linkage)",
+      "status": "PASS",
+      "detail": "106/106 rotation transitions independently recomputed (previousNextHash === newActiveHash) — next-seed pre-commitment chain intact"
+    },
+    {
+      "step": 3,
+      "name": "Hash Consistency Within Epoch",
+      "status": "PASS",
+      "detail": "All 102 epochs: serverSeedHashed identical across all bets within each epoch"
+    },
+    {
+      "step": 4,
+      "name": "Nonce Audit",
+      "status": "PASS",
+      "detail": "102 epochs. 2 capture-retry: 2 reconstructed from revealed seed (no captured server response available for comparison), 0 unverifiable."
+    },
+    {
+      "step": 5,
+      "name": "Draw Recomputation (RNG determinism)",
+      "status": "PASS",
+      "detail": "5100/5100 verified, 0 SET mismatches, 0 skipped"
+    },
+    {
+      "step": 6,
+      "name": "Client Seed Influence",
+      "status": "PASS",
+      "detail": "Wrong client seed changed 5100/5100 draws (100.0%) across 102 epochs"
+    },
+    {
+      "step": 7,
+      "name": "Payout Math",
+      "status": "PASS",
+      "detail": "5100 bets checked, 0 errors (tolerance 1e-8)"
+    },
+    {
+      "step": 8,
+      "name": "Multiplier Table Provenance",
+      "status": "PASS",
+      "detail": "Every captured payout matched its entry in the committed kenoConfig.json multiplier table: 5100 bets checked, 0 mismatches. Captured play exercised 190/260 table rows; unobserved rare-hit rows are covered by the analytic identity in Step 17 (independent hypergeometric probabilities × the committed table), not by direct empirical comparison."
+    },
+    {
+      "step": 9,
+      "name": "Phase C Bet-Size Invariance (Phase D at $10)",
+      "status": "PASS",
+      "detail": "100/100 Phase D bets: draws recomputed correctly at $10, all multipliers match $0.01 table. Equivalence proven deterministically."
+    },
+    {
+      "step": 10,
+      "name": "Configuration Completeness",
+      "status": "PASS",
+      "detail": "40/40 configs covered; missing: none"
+    },
+    {
+      "step": 11,
+      "name": "Zero-Edge Audit (scaling_edge absent)",
+      "status": "PASS",
+      "detail": "scaling_edge field: [] — flat 0.1% house edge across all configs"
+    },
+    {
+      "step": 12,
+      "name": "Consolation Payout Disclosure (LOW/MEDIUM picks=1 zero-hit)",
+      "status": "PASS",
+      "detail": "LOW picks=1: 0.71× on 0 hits; MEDIUM picks=1: 0.41× on 0 hits — confirmed in multiplier table"
+    },
+    {
+      "step": 13,
+      "name": "Phase Labels",
+      "status": "PASS",
+      "detail": "Phases present: A, B, C, D; last bet phase: D"
+    },
+    {
+      "step": 14,
+      "name": "Dataset Hash",
+      "status": "PASS",
+      "detail": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9"
+    },
+    {
+      "step": 15,
+      "name": "Epoch Size",
+      "status": "PASS",
+      "detail": "102 epochs; min=50, max=50 bets per epoch"
+    },
+    {
+      "step": 16,
+      "name": "Hit Symmetry (hypergeometric mode verification)",
+      "status": "PASS",
+      "detail": "picks=10: mode of hypergeometric hit distribution = 2 (expected 2 or 3, E[hits]=2.5)"
+    },
+    {
+      "step": 17,
+      "name": "Probability Independence (Anti-Circularity)",
+      "status": "PASS",
+      "detail": "Given Duel's committed multiplier table (kenoConfig.json), independently-derived hypergeometric probabilities P(k) = C(picks,k)×C(40-picks,10-k)/C(40,10) yield 99.9% RTP for all 40 configurations (analytic identity over the full table). Max deviation: 0.000000% (CLASSIC/picks=2 (RTP=99.900000%)). The hit probabilities are derived independently from the RNG analysis; the multiplier table is operator-supplied. Live play (Step 8) exercised 190/260 table rows and matched every captured payout; rare high-hit rows that did not occur in the 5,100-bet sample are evaluated against the committed table via this identity rather than empirically."
+    },
+    {
+      "step": 18,
+      "name": "Phase D — Client Seed Variation",
+      "status": "PASS",
+      "detail": "100 bets at $10, 2 distinct client seeds, configs: MEDIUM|10"
+    },
+    {
+      "step": 19,
+      "name": "Simulation Results — Pass 1 Integrity",
+      "status": "PASS",
+      "detail": "40,000,000 rounds × 40 configs; avg RTP=99.9704%. 0/40 configs fail at Bonferroni-corrected threshold (α/40 = 0.00025). 0/40 flag even at uncorrected α = 0.01."
+    },
+    {
+      "step": 20,
+      "name": "Simulation Results — Pass 2 Cherry-Pick Test",
+      "status": "PASS",
+      "detail": "1666 seed×config combos; Test A: 13/1666 fails (expected ≤17); Test B: 57/1666 flags (expected ≤80 under H₀); 57 isolated-early, 0 broad — distributional noise confirmed"
+    }
+  ],
+  "informational": [
+    {
+      "label": "RTP Analysis",
+      "detail": "Empirical RTP: 91.39% over 5,100 bets (high variance at this sample size; theoretical 99.90% proven analytically in Step 16)"
+    },
+    {
+      "label": "Chi-squared Goodness-of-Fit",
+      "detail": "40 configs; fails at α=0.01: 0/40; min p=0.1168 (~128 bets/config insufficient; see simulation Step 19)"
+    },
+    {
+      "label": "Serial Independence (lag-1)",
+      "detail": "r₁=0.320, z=22.85 — large z is expected: the dataset contains Phase B (1,000 consecutive picks=1 bets, E[hits]=0.25) followed by Phase C (1,000 consecutive picks=10 bets, E[hits]=2.5). This regime shift creates artificial serial correlation in the aggregate hit series. It is a property of the audit's phase ordering, not the RNG. Simulation Step 19 tests each config independently at 1M rounds and finds 0/40 serial independence failures."
+    },
+    {
+      "label": "Serial Independence (runs test)",
+      "detail": "runs=1519, expected=2097.0, z=-19.70, p=0.00e+0 — same phase-ordering artifact as lag-1 above (picks=1 → picks=10 regime shift). Per-config simulation in Step 19 confirms RNG outputs are serially independent."
+    }
+  ],
+  "summary": {
+    "passed": 20,
+    "flags": 0,
+    "hardFail": 0,
+    "verdict": "PROVABLY FAIR — Full Pass"
+  }
+}
