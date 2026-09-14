@@ -18,6 +18,7 @@ import * as payouts        from './steps/payouts';
 import * as statistical    from './steps/statistical';
 import * as dataset        from './steps/dataset';
 import * as simulation     from './steps/simulation';
+import * as artifacts   from './steps/artifacts';
 
 // ── Pre-flight: dataset hash ───────────────────────────────────────────────────
 
@@ -79,6 +80,7 @@ const results = [
   ...payouts.run(ctx),      // Steps  7–12
   ...dataset.run(ctx),      // Steps 13–18
   ...simulation.run(ctx),   // Steps 19–20
+  ...artifacts.run(ctx),    // Step 21
 ];
 
 // ── Informational context (not scored) ───────────────────────────────────────
