@@ -1,10 +1,18 @@
 /**
  * Two-pass Monte Carlo simulation for Duel.com Keno audit.
  *
- * Pass 1 — Fresh random seeds (1 per config × 1,000,000 rounds × 40 configs = 40M rounds total).
- *   Validates the independent implementation and multiplier tables.
+ * Pass 1 — Fresh seeds (1 per config × 1,000,000 rounds × 40 configs = 40M rounds total).
+ *   Exercises the draw code (src/rng.ts, PORTED from Duel's published Verify-tab code — not an
+ *   independent implementation; see its header) and the multiplier tables.
  *   Includes chi-squared goodness-of-fit and serial independence (autocorrelation + runs test).
- *   Uses crypto.randomBytes() — results change on every run.
+ *   The 40 seed pairs were generated once with crypto.randomBytes and are PINNED in src/sim-seeds.ts (SIM_SEEDS),
+ *   so every figure this file writes is a deterministic function of the code, the pinned seeds, the
+ *   pinned kenoConfig.json and the pinned dataset: a re-run reproduces it.
+ *
+ * NO RUN METADATA (profile KENO-27, rules.reproduction). The artifact carries no timestamp and no
+ * execution time: a field that differs on every run makes a legitimate regeneration unable to
+ * reproduce the pinned bytes, and a re-pin taken from such a run is a pin on the clock. Timings
+ * are printed to the console only.
  *
  * Pass 2 — Casino seeds (102 revealed seeds × 10,000 nonces each).
  *   Test A: chi-squared on full nonce range 0–9,999 vs hypergeometric distribution.
@@ -17,9 +25,10 @@ import * as fs     from 'fs';
 import * as path   from 'path';
 
 import { computeDrawFromBuffer }                              from './rng';
+import { SIM_SEEDS }                                          from './sim-seeds';
 import { KenoConfig, DIFFICULTY_TO_RISK }                    from './config';
 import { loadDataset, buildSeedMap }                         from './loader';
-import { chiSquaredTest, lag1Autocorrelation, runsTest } from './stats';
+import { chiSquaredTest, chiSquaredSurvival, lag1Autocorrelation, runsTest } from './stats';
 import type { KenoConfigFile, RiskLevel }                    from './types';
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -55,48 +64,8 @@ function clearLine(): void {
 // config correlation that a single shared seed would introduce (all configs
 // would share the same draw sequence, only differing in how many picks are
 // scored).  Generated once with crypto.randomBytes; pinned for reproducibility.
-const SIM_SEEDS: Array<{ server: string; client: string }> = [
-  { server: 'cb39d8adfaa1ebfac13d8e0de174140bc7d4315af7b8e49fb21e42ff69a0346b', client: 'ff57e66542fd7f65b600688dd952aaeb' },
-  { server: '5e3aefdde81b846a00a292d8f3c2c72fb2ba671a0078455821bbeb655fd7f3f3', client: '62c30e7143a455a5ca8449a60336209c' },
-  { server: 'fd036de869ba187678496424ecb6fc00faa3b0fe3703b20f9f1dacbec1df041e', client: '3c445ac10a4047a0518b766b9bcd8064' },
-  { server: '604a9dba65dce50ac812e712ccf243c53e207e2d455c8abf785765dee3442fcc', client: '8a0548646b20870bfab68f21fcd778fe' },
-  { server: '45e1b63fb6b11537144291a28055673cbd95f42f811ffef1f68f2390b47f9bf7', client: '72471a1d8830e50769ea1b38963b5c1c' },
-  { server: '593e73c44198ed9c299efbd40f51618eb427b963de459e3649ba11090bc6b78a', client: '969f862ffac3c44b78e3e3284e8895c0' },
-  { server: '34bb682011207c1656df279d4e966746e8ee07469bbc492dd97943638db7f78c', client: 'a6e9ecdb2b2965e2856ef4a2836b17b3' },
-  { server: '7c7da880dafd86ad14e4421e157d3f442f413501d3e3538f6a2307c143338e14', client: '788a1fe12573e37b790d09977213909a' },
-  { server: 'bbb20c99e36f5f036916795700fb4ee008781c667c05606af637d1e4f1189845', client: 'a94a6e80d81afde1e01b2b2f548e9220' },
-  { server: '9e83d80c34f2911e2c9cbd6d31d19777285d2128b123af00512f6eeb03422820', client: '3d470b7eec568ca75964fb0cac7d6939' },
-  { server: '5b5e178a6ea3363c738e205d6067fba050d8fca19522bac9e8796e15c2e19953', client: 'e685ed262e51dcf25c22a2649a2fead4' },
-  { server: '9a0cd23bb4b79c352f384916e57cdff6499eb737e569ad9b88a5e7ede5a85cb7', client: '5d478d7a166a6fd45c0d7264b3ee885e' },
-  { server: '87b0ad7fbfd965a9138695446ce468e28f090bf27b5f9dd3680a85b7f9316a8d', client: 'a4fa8689f2893ac22381669aee07e8cb' },
-  { server: '60a80fc65ce23f7e64c3b3f08af18e2aaa9dc2db9077d5c42bacbb1efb41be33', client: '44190cc77c0257c0c28f6e1d56a789cb' },
-  { server: 'e14c97e3eb7ffcb485fe004b917dcd5bfa90ecf784948f262594fdb91e12b410', client: 'f0c640407b012c0636bd5d532ccf5d1a' },
-  { server: 'e44ef4d2fd1fb52b9255df031bd87eccea52e4a45299392a3fcd805ae50a406e', client: '7629ce1973f8fcf36ab503a932af062d' },
-  { server: 'a8c200b668a2b1f79ca6335702d3d2200ed7af104cadd7708de53d7222f98b20', client: '3216783670da517ae60ab25990fcc864' },
-  { server: 'b3f641dd918e7cfc42f28dc4a6ed9a1467d3c7830ff43c8888e5db61dd3dc50a', client: 'aa46716b35510c3b943ed11713a350da' },
-  { server: '4d6b4cfb93832e833545309c703338b2498dabfe9415ddedd3d45102731c9d03', client: '01623a665227437cacce0a10906e721e' },
-  { server: 'ddd2ec93eaa0e96c36121194ac1aee59dc827356cb4f39c668239d8d8d946dee', client: '73dede8b54b985aed840995fa5a9e1b8' },
-  { server: 'fcd34512eb67c88b52412006cb85e5b337401ac24a9ca482eefe88690538c108', client: 'b60e43828fb758a0dae458d8abe3a6dd' },
-  { server: '1a9720eb388e1faf2d2549c2fbd1a4acb1e53f9704a5e9dfea3e672f260b55f7', client: '9ebf4dbe2a34642c96336246238fb701' },
-  { server: '3c760e93cdcf85a7caac1417646cf5fbe3705870cdabd7e95b94707e58717826', client: '60666ad8a4e63a870faa9fe2ac645a1b' },
-  { server: '3913ff44936350352e40f6d3ad8b511e684ff6d39b3ca4af592c1c992ad6980a', client: '12bc305ab2009661184c8ccba6bb8132' },
-  { server: '65d1cf239513b8b3eb5978ad4808e1a720969c5e6a461dfdbd906517d3c0035c', client: '981659b62b698ff660ccf3169862f75d' },
-  { server: 'c8dd2240e380a3c6effc3521588a8cdae766d6db228c337e6d52f64506457820', client: '21983aa73e8f3012dcd13fca4fa24799' },
-  { server: 'cdf4e018090f96e3304d8c0827d384c8edf21eb01c354c0b2e6b73c9e06fef02', client: '13b122ebde1c49de96a0a13dffa1e816' },
-  { server: 'e2f6e6f8d081944ba5814c2dd235df5462df668a0a74bf1441a6f3cc2c3611d0', client: 'e5e3ddcc916d8a697def085b6fd90bab' },
-  { server: '7738101d8f77dd292fda86df7bcbde3c6367ae3d1aeb95455ba8fb3e1da78fea', client: '1f4e099205a281259d8e8243853af56a' },
-  { server: '5fea259c24dfad7fd6608ad0862070a31b23c483305f6afc66b8ffaacb56b955', client: 'c343b74fca50ec9e33ce6fe42e51996d' },
-  { server: '6f801d4fb5bb9365a4c43f5586f225c998463516f25e1e5852108f3e6eab4e2f', client: '805a5e2ac48a495c5b204bbdb480f586' },
-  { server: '4a94b811c61c8ca785ecadecc09f48a0dcc9b2296033053696631780fe74c2b6', client: '5b2b18837f7a3018f0270cb40d124a2d' },
-  { server: 'bced60ed9d3ffde08e7c8caabc84f10376d940764a4660f66893970ddff9cf36', client: 'f9c247bdf814be2de1f5bf4e6a4216f1' },
-  { server: 'd07cc29c5991ea0dc77f44eeaecdec582a96d8c66fbf81c1e0b8812cfe9a9b3c', client: 'd76d25a3ff119c2f41b9886e1001cf20' },
-  { server: '3e8c794330834b22ce3f84d4a99aea9df4914bbf1bd4b7836d69b0e9e03d112e', client: '0a9407535e56c0ea7842783fe823356f' },
-  { server: '6655f9793902c0b59b71faec6472c7b032b8a7f9ca1dfbd5151eb4c7e8b0793d', client: '55ce289071790a67218f7977f6849d7a' },
-  { server: '41148e2474d407c7997f68932ed76fb07d311b0af02a91f40af64ad0c5e9fa06', client: '88244901d64c70b906332e8041df1047' },
-  { server: '9c5a7bc4f0d29da0b88dff204b498cdec85b372fd4889464a82b761b88c586b5', client: 'b16f225a94e15a72c7cabbe916f542b3' },
-  { server: 'c09fffeb255aaf23fbdbb8076bb271f70f90c469ce2a86df34cbf7624b277466', client: '1f62d31db4d606d77b73304617bc989f' },
-  { server: 'd915e6571163912728ca761833e4e48a6a106152bb4306217ebbd7e4af1abe0d', client: 'f0ba43e932257b8a1dd5eefe22f6fc01' },
-];
+// The 40 pinned pairs live in src/sim-seeds.ts so the verifier can replay from them (KENO-20).
+
 
 // ── Convergence sample points ────────────────────────────────────────────────
 const CONVERGENCE_SAMPLES = [1_000, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000];
@@ -114,8 +83,10 @@ function runConfig(
   risk:       RiskLevel,
   picks:      number,
   rounds:     number,
-): { hitCounts: number[]; hitSequence: number[]; simulatedRTP: number; rtpSnapshots: Map<number, number> } {
+): { hitCounts: number[]; hitSequence: number[]; simulatedRTP: number; rtpSnapshots: Map<number, number>; numberCounts: number[] } {
   const hitCounts   = new Array(picks + 1).fill(0);
+  // KENO-20: every drawn number of every round is counted, for the grid-uniformity test.
+  const numberCounts = new Array(cfg.gridSize).fill(0);
   const hitSequence = new Array(rounds) as number[];
   let totalPayout   = 0;
 
@@ -125,6 +96,7 @@ function runConfig(
   for (let nonce = 0; nonce < rounds; nonce++) {
     const drawn    = computeDrawFromBuffer(keyBuffer, clientSeed, nonce, cfg.gridSize, cfg.drawnCount);
     const drawnSet = new Set(drawn);
+    for (const x of drawn) numberCounts[x - 1]++;
 
     let hits = 0;
     for (let p = 1; p <= picks; p++) {
@@ -141,7 +113,7 @@ function runConfig(
     }
   }
 
-  return { hitCounts, hitSequence, simulatedRTP: totalPayout / rounds, rtpSnapshots };
+  return { hitCounts, hitSequence, simulatedRTP: totalPayout / rounds, rtpSnapshots, numberCounts };
 }
 
 /**
@@ -193,6 +165,9 @@ const pass1Results: Array<{
   r1Z:            number;
   runsZ:          number;
   runsPValue:     number;
+  numberCounts:   number[];
+  uniformity:     { chi2: number; correctedChi2: number; df: number; pValue: number };
+  serial:         { pairSum: number; first: number; last: number; runs: number; median: number; n1: number };
 }> = [];
 
 // Per-config RTP snapshots for convergence chart
@@ -208,7 +183,7 @@ for (let ci = 0; ci < allConfigs.length; ci++) {
   const keyBuffer  = Buffer.from(seedPair.server, 'hex');
   const clientSeed = seedPair.client;
 
-  const { hitCounts, hitSequence, simulatedRTP, rtpSnapshots } = runConfig(
+  const { hitCounts, hitSequence, simulatedRTP, rtpSnapshots, numberCounts } = runConfig(
     keyBuffer, clientSeed, risk, picks, ROUNDS_PER_CONFIG,
   );
   allSnapshots.push(rtpSnapshots);
@@ -221,7 +196,21 @@ for (let ci = 0; ci < allConfigs.length; ci++) {
   const { chi2, df, pValue }                              = chiSquaredTest([...hitCounts], expectedCounts);
   const r1                                                = lag1Autocorrelation(hitSequence);
   const r1Z                                               = r1 / (1 / Math.sqrt(ROUNDS_PER_CONFIG));
-  const { z: runsZ, pValue: runsPValue }                  = runsTest(hitSequence);
+  const { z: runsZ, pValue: runsPValue, runs, median, n1 } = runsTest(hitSequence);
+
+  // KENO-20 additions (2026-09-25). Nothing above this line changed, so every previously published
+  // Pass 1 figure is reproduced; the additions are appended to each row.
+  //  - Grid uniformity: rounds × drawnCount numbers over the grid; each draw is WITHOUT replacement,
+  //    so Pearson's X² over the gridSize counts is (N−d)/(N−1) · χ²_{N−1}; corrected = X²·(N−1)/(N−d).
+  //  - Serial sufficient statistics: with the hit histogram (Σx, Σx²) these integers let the
+  //    verifier re-derive r1 EXACTLY and the runs z / p by the same formula, without the 1M sequence.
+  const expEach = ROUNDS_PER_CONFIG * cfg.drawnCount / cfg.gridSize;
+  let uniX2 = 0;
+  for (const o of numberCounts) uniX2 += (o - expEach) ** 2 / expEach;
+  const uniCorrected = uniX2 * (cfg.gridSize - 1) / (cfg.gridSize - cfg.drawnCount);
+  const uniP = chiSquaredSurvival(uniCorrected, cfg.gridSize - 1);
+  let pairSum = 0;
+  for (let t = 0; t + 1 < hitSequence.length; t++) pairSum += hitSequence[t] * hitSequence[t + 1];
 
   pass1Results.push({
     risk, picks,
@@ -232,6 +221,9 @@ for (let ci = 0; ci < allConfigs.length; ci++) {
     expectedCounts,
     chi2, df, pValue,
     r1, r1Z, runsZ, runsPValue,
+    numberCounts,
+    uniformity: { chi2: uniX2, correctedChi2: uniCorrected, df: cfg.gridSize - 1, pValue: uniP },
+    serial: { pairSum, first: hitSequence[0], last: hitSequence[hitSequence.length - 1], runs, median, n1 },
   });
 }
 clearLine();
@@ -348,6 +340,9 @@ const pass2Results: Array<{
   late_p:           number;
   late_df:          number;
   cherry_pick_flag: boolean;
+  fullCounts:       number[];
+  earlyCounts:      number[];
+  lateCounts:       number[];
 }> = [];
 
 let testAFails      = 0;
@@ -405,6 +400,8 @@ for (const [seedHash, info] of seedEntries) {
       late_p:      lateTest.pValue,
       late_df:     lateTest.df,
       cherry_pick_flag: cherryPickFlag,
+      // Shipped 2026-09-25 (KENO-21) so the verifier re-derives every row's chi² / p.
+      fullCounts, earlyCounts, lateCounts,
     });
   }
 
@@ -424,8 +421,12 @@ const testARange = testAPValue >= 0.01
   ? `within expected range (binomial p=${testAPValue.toFixed(4)})`
   : `EXCEEDS expected range (binomial p=${testAPValue.toFixed(4)})`;
 
-// Binomial p-value for cherry-pick flags: P(X >= flags | N, p=0.05)
-// Under H₀ the flag rate is ~0.05 (early rejects at alpha=0.05 AND late doesn't)
+// Binomial p-value for cherry-pick flags: P(X >= flags | N, p=0.05).
+// A flag needs early p < 0.05 AND late p >= 0.05. The two windows use disjoint nonces, so under H₀
+// the nominal flag rate is 0.05 × 0.95 = 0.0475. The tail is computed at 0.05, the nominal rate of
+// the early-window test alone and an upper bound on the flag rate: it gives the larger tail, so it
+// is the more lenient of the two (57 / 1,666 flags: 0.9992 at 0.05, 0.9968 at 0.0475). The pinned
+// artifact stores the 0.05 tail and Step 20 recomputes it at 0.05; MANIFEST states both.
 const cherryPValue = binomSurvival(cherryPickFlags, N, 0.05);
 const cherryVerdict = cherryPValue >= 0.01 ? 'PASS' : 'FAIL';
 const cherryRange = cherryPValue >= 0.01
@@ -441,18 +442,18 @@ console.log(`  Time: ${(pass2ElapsedMs / 1000).toFixed(1)}s\n`);
 // ── Write output ──────────────────────────────────────────────────────────────
 
 const output = {
-  generatedAt: new Date().toISOString(),
   pass1_fresh_seeds: {
-    description: 'Auditor-generated random seeds. Validates independent implementation, multiplier tables, and serial independence of RNG outputs.',
+    description: 'Auditor-generated random seeds. Exercises the draw code ported from Duel\'s published Verify-tab code, the multiplier tables, and serial independence of RNG outputs.',
     roundsPerConfig:    ROUNDS_PER_CONFIG,
     totalRounds:        ROUNDS_PER_CONFIG * allConfigs.length,
     configs:            allConfigs.length,
-    executionTimeMs:    pass1ElapsedMs,
     avgTheoreticalRTP:  pass1AvgTheoRTP,
     avgSimulatedRTP:    pass1AvgRTP,
     chi2FailsAtAlpha01: pass1Chi2Fails,
     chi2FailsBonferroni: pass1Chi2FailsBon,
     serialIndependenceFails: pass1SerialFails,
+    uniformityFailsAtAlpha01: pass1Results.filter(r => r.uniformity.pValue < 0.01).length,
+    uniformityFailsBonferroni: pass1Results.filter(r => r.uniformity.pValue < 0.01 / allConfigs.length).length,
     results: pass1Results,
     convergence: convergenceData,
   },
@@ -468,15 +469,23 @@ const output = {
     test_b_cherry_pick_flags:     cherryPickFlags,
     test_b_binomial_pValue:       cherryPValue,
     test_b_verdict:               cherryVerdict,
-    executionTimeMs: pass2ElapsedMs,
     results: pass2Results,
   },
 };
 
+// A SIMULATION RUN MUST NOT REWRITE THE ARTIFACT IT IS QUOTED FROM. outputs/simulation-results.json
+// and outputs/rtp-convergence.html are committed, pinned in src/artifact-pins.ts and scored by
+// Steps 19–21; a plain `npm run simulate` writing over them would replace the evidence of record
+// with whatever this run happened to produce. This run writes under outputs/run/ — gitignored, a
+// run record. The committed copies are refreshed only by PF_EMIT=1, and re-pinned in the same
+// commit. Same contract as tests/verify.ts.
+const PF_EMIT = process.env.PF_EMIT === '1';
 const OUTPUTS_DIR = path.join(__dirname, '..', 'outputs');
-fs.mkdirSync(OUTPUTS_DIR, { recursive: true });
+const RESULTS_DIR = PF_EMIT ? OUTPUTS_DIR : path.join(OUTPUTS_DIR, 'run');
+const WROTE_TO = PF_EMIT ? 'outputs' : 'outputs/run';
+fs.mkdirSync(RESULTS_DIR, { recursive: true });
 
-const outPath = path.join(OUTPUTS_DIR, 'simulation-results.json');
+const outPath = path.join(RESULTS_DIR, 'simulation-results.json');
 fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
 
 // ── Generate RTP Convergence Chart (self-contained HTML) ─────────────────────
@@ -485,12 +494,17 @@ const theoreticalRTP = 0.999; // 99.9% — 0.1% house edge
 const finalPoint = convergenceData[convergenceData.length - 1];
 const finalRTP = finalPoint.meanRTP;
 
+// The pinned chart is self-contained: Chart.js is inlined from the exact-pinned devDependency
+// (package.json chart.js 4.4.7), never loaded from a CDN.
+const CHARTJS_SOURCE = fs.readFileSync(path.join(path.dirname(require.resolve('chart.js')), 'chart.umd.js'), 'utf8');
+
 const chartHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>DUEL.COM KENO RTP CONVERGENCE — ${allConfigs.length} CONFIGS x 1M ROUNDS EACH</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"><\/script>
+<!-- Chart.js 4.4.7 dist/chart.umd.js inlined verbatim from the npm package pinned in package-lock.json -->
+<script>${CHARTJS_SOURCE}<\/script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; padding: 24px; }
@@ -641,9 +655,11 @@ new Chart(ctx, {
 </body>
 </html>`;
 
-fs.writeFileSync(path.join(OUTPUTS_DIR, 'rtp-convergence.html'), chartHTML);
+fs.writeFileSync(path.join(RESULTS_DIR, 'rtp-convergence.html'), chartHTML);
 
 console.log('══════════════════════════════════════════════════════════');
-console.log(`  Written: outputs/simulation-results.json`);
-console.log(`  Written: outputs/rtp-convergence.html`);
+console.log(`  Written: ${WROTE_TO}/simulation-results.json`);
+console.log(`  Written: ${WROTE_TO}/rtp-convergence.html`);
+if (PF_EMIT) console.log('  REPORT GENERATION (PF_EMIT=1): the committed artifacts in outputs/ were rewritten — re-pin them in src/artifact-pins.ts.');
+else         console.log('  Committed artifacts NOT modified.');
 console.log('══════════════════════════════════════════════════════════\n');

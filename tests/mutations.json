@@ -1,0 +1,689 @@
+[
+  {
+    "name": "M01 revealed server seed corrupted mid-phase",
+    "step": 1,
+    "runner": "verify",
+    "expect": "[FAIL] Step 1",
+    "guard": "Step 1 hashes every revealed server seed to the preceding epoch's published commitment; a revealed seed that does not hash to its commitment is the failure commit-reveal exists to detect.",
+    "file": "tests/verify.ts",
+    "find": "const seedMap = buildSeedMap(ds.seeds);",
+    "replace": "ds.seeds[20].seed.serverSeed = '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff'; // MUTATION\nconst seedMap = buildSeedMap(ds.seeds);"
+  },
+  {
+    "name": "M02 forward commitment link broken",
+    "step": 2,
+    "runner": "verify",
+    "expect": "[FAIL] Step 2",
+    "guard": "Step 2 requires seeds[i].nextServerSeedHash === seeds[i+1].serverSeedHashed on every rotation, so the ORDER of the epochs is pre-committed.",
+    "file": "tests/verify.ts",
+    "find": "const seedMap = buildSeedMap(ds.seeds);",
+    "replace": "ds.seeds[30].seed.nextServerSeedHash = '0'.repeat(64); // MUTATION\nconst seedMap = buildSeedMap(ds.seeds);"
+  },
+  {
+    "name": "M03 foreign commitment inside an epoch",
+    "step": 3,
+    "runner": "verify",
+    "expect": "[FAIL] Step 3",
+    "guard": "Step 3 keys epochs by the capture timeline, not by the hash under test, so a bet carrying another epoch's hash inside a window is a disagreement with the rotation record. The old form grouped by the hash itself and could not fail.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[10].seed.serverSeedHashed = bets[60].seed.serverSeedHashed; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M04 nonce repeated inside an epoch",
+    "step": 4,
+    "runner": "verify",
+    "expect": "[FAIL] Step 4",
+    "guard": "Step 4 requires each epoch to run 0..49 from the DECLARED base; a repeat that is not the single capture-retry pattern is operator-side — HARD FAIL, not a capture-origin FLAG.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[3].seed.nonce = 42; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M04b nonces reordered with no gap",
+    "step": 4,
+    "runner": "verify",
+    "expect": "[FAIL] Step 4",
+    "guard": "Swapping two nonces leaves the SORTED sequence 0..49 intact, so only the capture-order check (strictly increasing in the order recorded, before any sort) can see it.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "[bets[5].seed.nonce, bets[6].seed.nonce] = [bets[6].seed.nonce, bets[5].seed.nonce]; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M05 drawn set altered on a captured bet",
+    "step": 5,
+    "runner": "verify",
+    "expect": "[FAIL] Step 5",
+    "guard": "Step 5 recomputes every draw from (serverSeed, clientSeed, nonce); a served draw the algorithm does not produce is the core failure mode.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[0].response.drawn_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M05b one epoch's revealed seed dropped",
+    "step": 5,
+    "runner": "verify",
+    "expect": "[FAIL] Step 5",
+    "guard": "With a revealed seed missing, 50 bets cannot be recomputed and there are ZERO mismatches; only the coverage bound (recomputed == EXPECTED_BETS) catches it.",
+    "file": "tests/verify.ts",
+    "find": "const seedMap = buildSeedMap(ds.seeds);",
+    "replace": "const seedMap = buildSeedMap(ds.seeds); seedMap.delete([...seedMap.keys()][0]); // MUTATION"
+  },
+  {
+    "name": "M05c served draw padded with a duplicate",
+    "step": 5,
+    "runner": "verify",
+    "expect": "served drawn_numbers not exactly",
+    "guard": "A served drawn_numbers padded with a repeat of its own first number has the SAME Set as the true draw, so the set comparison passes; only the served-structure assertion (exactly 10 distinct numbers in 1-40) catches it (KENO-10).",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[0].response.drawn_numbers = [...bets[0].response.drawn_numbers, bets[0].response.drawn_numbers[0]]; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M05d duplicate pick in a pick set",
+    "step": 5,
+    "runner": "verify",
+    "expect": "illegal pick set",
+    "guard": "A pick set with a repeated number is not a legal Keno bet; Step 5 asserts pick legality (size, distinctness, range, request.picks) on every bet (KENO-10).",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[0].request.selected_positions = [bets[0].request.selected_positions[0], ...bets[0].request.selected_positions.slice(0, -1)]; bets[0].response.selected_positions = bets[0].request.selected_positions; // MUTATION: same size, first pick duplicated\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M05e pick independence no longer witnessed on data",
+    "step": 5,
+    "runner": "verify",
+    "expect": "no epoch carries more than one pick set",
+    "guard": "KENO-17 requires the pick-free derivation to be witnessed across bets that share a seed pair and differ in their picks. Giving every bet its epoch's first pick set removes the witness; Step 5 must say the property is no longer shown rather than pass on the argument count alone.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "for (const b of bets) { const f = bets.find(x => x.seed.serverSeedHashed === b.seed.serverSeedHashed)!; b.request.selected_positions = [...f.request.selected_positions]; b.response.selected_positions = [...f.request.selected_positions]; b.request.picks = f.request.picks; } // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M06 draw ignores the client seed",
+    "step": 6,
+    "runner": "verify",
+    "expect": "[FAIL] Step 6",
+    "guard": "If the HMAC message drops the client seed, a wrong client seed reproduces every draw; Step 6 requires every draw to change.",
+    "file": "src/rng.ts",
+    "find": "const message = `${clientSeed}:${nonce}:${cursor}`;",
+    "replace": "const message = `fixed:${nonce}:${cursor}`; // MUTATION"
+  },
+  {
+    "name": "M06b empty-seed control neutered",
+    "step": 6,
+    "runner": "verify",
+    "expect": "[FAIL] Step 6",
+    "guard": "Step 6's empty-seed control recomputes every bet with clientSeed = ''. Making the 'empty' draw use the REAL client seed makes all 5,100 collide; only the empty-seed half can see it (the wrong-seed half is untouched).",
+    "file": "tests/steps/determinism.ts",
+    "find": "const emptyDraw   = computeDrawFromBuffer(key, '', bet.seed.nonce);",
+    "replace": "const emptyDraw   = computeDrawFromBuffer(key, bet.seed.clientSeed, bet.seed.nonce); // MUTATION"
+  },
+  {
+    "name": "M07 a win nudged by one 1e-16 unit",
+    "step": 7,
+    "runner": "verify",
+    "expect": "[FAIL] Step 7",
+    "guard": "Step 7 compares amount_won with amount x round13(recomputed cell) on integers. A credit moved by 1e-16 — which the former relative 1e-12 on doubles forgave — must FAIL.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "{ const w = bets.find(b => b.response.amount_won !== '0')!; const s = w.response.amount_won; w.response.amount_won = s.padEnd(s.indexOf('.') + 17, '0').replace(/0$/, '1'); } // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M07b forged win in a re-pinned dataset",
+    "step": 7,
+    "runner": "verify",
+    "expect": "[FAIL] Step 7",
+    "guard": "Forged evidence: the dataset is edited AND its SHA-256 pin re-pinned, so the pre-flight abort and Step 14 both accept it; the payout recomputation must still reject the forged credit.",
+    "edits": [
+      {
+        "file": "data/keno-master-5100bets.json",
+        "find": "\"amount_won\": \"0.011\"",
+        "replace": "\"amount_won\": \"0.012\""
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/loader.ts",
+        "find": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9",
+        "hashOf": "data/keno-master-5100bets.json"
+      }
+    ]
+  },
+  {
+    "name": "M08 served multiplier nudged by one 13-dp unit",
+    "step": 8,
+    "runner": "verify",
+    "expect": "[FAIL] Step 8",
+    "guard": "Step 7 settles from the RECOMPUTED cell, so a doctored served multiplier with an untouched amount_won passes Step 7; Step 8 compares the served string with the display-rounded cell exactly.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "{ const w = bets.find(b => b.response.multiplier === '1.1')!; w.response.multiplier = '1.1000000000001'; } // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M09 a Phase D bet relabelled",
+    "step": 9,
+    "runner": "verify",
+    "expect": "[FAIL] Step 9",
+    "guard": "Step 9 binds the elevated-stake population to the capture plan (100 Phase D bets at $10); a Phase D that is not the plan's did not show bet-size invariance.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets.filter(b => b.phase === 'D')[0].request.amount = '9.99'; // MUTATION: an elevated-stake bet off the $10 stake\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M10 configuration floor above the leanest config",
+    "step": 10,
+    "runner": "verify",
+    "expect": "[FAIL] Step 10",
+    "guard": "Step 10 scores the per-config floor from src/loader.ts; raising it above the leanest config's 73 bets must FAIL, proving the floor is enforced rather than printed.",
+    "file": "src/loader.ts",
+    "find": "export const MIN_BETS_PER_CONFIG = 50;",
+    "replace": "export const MIN_BETS_PER_CONFIG = 80; // MUTATION"
+  },
+  {
+    "name": "M11 a bet served a scaled edge",
+    "step": 11,
+    "runner": "verify",
+    "expect": "[FAIL] Step 11",
+    "guard": "Step 11 is the declarationTruth for KENO-31 n/a: every bet must be served the flat edge 0.1; a single scaled edge FAILs it.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[0].response.effective_edge = 0.2; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M12 a new consolation cell in a re-pinned config",
+    "step": 12,
+    "runner": "verify",
+    "expect": "[FAIL] Step 12",
+    "guard": "Step 12 enumerates every non-monotone cell of the table and requires the declared list exactly; a table that grows a consolation payout on HIGH picks=1 (config re-pinned so the pre-flight accepts it) must FAIL.",
+    "edits": [
+      {
+        "file": "kenoConfig.json",
+        "find": "\"HIGH\": {\n                \"1\": [\n                    0,\n                    3.996",
+        "replace": "\"HIGH\": {\n                \"1\": [\n                    0.5,\n                    3.996"
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/loader.ts",
+        "find": "efd3c645c4b3956199fde62dd65446c08e4605763d2d0f34c97a226bdbae4f91",
+        "hashOf": "kenoConfig.json"
+      }
+    ]
+  },
+  {
+    "name": "M12b a payout cap key appears in the config",
+    "step": 12,
+    "runner": "verify",
+    "expect": "[FAIL] Step 12",
+    "guard": "Step 12 declares the cap UNDECLARED on the evidence that the pinned config carries no limit key; a config (re-pinned) that carries max_payout must FAIL, so the n/a is a reading of the config and not a constant.",
+    "edits": [
+      {
+        "file": "kenoConfig.json",
+        "find": "\"scaling_edge\": []",
+        "replace": "\"scaling_edge\": [],\n        \"max_payout\": 3000000"
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/loader.ts",
+        "find": "efd3c645c4b3956199fde62dd65446c08e4605763d2d0f34c97a226bdbae4f91",
+        "hashOf": "kenoConfig.json"
+      }
+    ]
+  },
+  {
+    "name": "M13 a phase label corrupted",
+    "step": 13,
+    "runner": "verify",
+    "expect": "[FAIL] Step 13",
+    "guard": "Step 13 counts bets per phase against src/loader.ts constants; a relabelled bet breaks the per-phase population.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "bets[0].phase = 'X'; // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M14 dataset altered and the pre-flight abort disabled",
+    "step": 14,
+    "runner": "verify",
+    "expect": "[FAIL] Step 14",
+    "guard": "With the pre-flight dataset abort off, Step 14's own SHA-256 comparison is what stands between a doctored dataset and a Full Pass.",
+    "edits": [
+      {
+        "file": "data/keno-master-5100bets.json",
+        "find": "\"schema\": \"duel-keno-capture-v3\"",
+        "replace": "\"schema\": \"duel-keno-capture-v4\""
+      },
+      {
+        "file": "tests/verify.ts",
+        "find": "if (!hashCheck.match) { process.exit(1); }",
+        "replace": "if (false) { process.exit(1); } // MUTATION"
+      }
+    ]
+  },
+  {
+    "name": "M15 one bet removed from an epoch",
+    "step": 15,
+    "runner": "verify",
+    "expect": "[FAIL] Step 15",
+    "guard": "Step 15 pins every epoch to exactly 50 bets and the epoch count to 102.",
+    "file": "tests/verify.ts",
+    "find": "const seedMap = buildSeedMap(ds.seeds);",
+    "replace": "ds.bets.splice(100, 1); // MUTATION\nconst seedMap = buildSeedMap(ds.seeds);"
+  },
+  {
+    "name": "M16 hit probability no longer hypergeometric",
+    "step": 16,
+    "runner": "verify",
+    "expect": "[FAIL] Step 16",
+    "guard": "Step 16 checks the picks=10 mode of the model every RTP rests on; replacing C(N-n, d-k) by C(N-n, k) moves the mode to 10.",
+    "file": "src/config.ts",
+    "find": "return (comb(picks, hits) * comb(grid - picks, drawn - hits)) / comb(grid, drawn);",
+    "replace": "return (comb(picks, hits) * comb(grid - picks, hits)) / comb(grid, drawn); // MUTATION"
+  },
+  {
+    "name": "M17 an unreached table cell changed in a re-pinned config",
+    "step": 17,
+    "runner": "verify",
+    "expect": "[FAIL] Step 17",
+    "guard": "HIGH picks=10 hits=10 was never reached in live play (payout-coverage.json), so no served multiplier can contradict it; the analytic RTP identity — double and exact — must reject it on its own.",
+    "edits": [
+      {
+        "file": "kenoConfig.json",
+        "find": "1000,\n                    1200\n                ]\n            }\n        },\n        \"probabilities\"",
+        "replace": "1000,\n                    1300\n                ]\n            }\n        },\n        \"probabilities\""
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/loader.ts",
+        "find": "efd3c645c4b3956199fde62dd65446c08e4605763d2d0f34c97a226bdbae4f91",
+        "hashOf": "kenoConfig.json"
+      }
+    ]
+  },
+  {
+    "name": "M17b table negative control neutered",
+    "step": 17,
+    "runner": "verify",
+    "expect": "NEGATIVE CONTROL: a table cell",
+    "guard": "Step 17's table negative control bumps one cell by one unit in its last place and requires the exact RTP check to reject it. Leaving the cell unchanged makes the control vacuous; the step must catch its own defeated control.",
+    "file": "tests/steps/dataset.ts",
+    "find": "bumped[1] = '3.997';",
+    "replace": "bumped[1] = lits[1]; // MUTATION"
+  },
+  {
+    "name": "M17c law negative control neutered",
+    "step": 17,
+    "runner": "verify",
+    "expect": "NEGATIVE CONTROL: a hypergeometric weight",
+    "guard": "Step 17's law negative control corrupts one weight by one unit and requires the exact identity check to reject it; corrupting by 0 makes it vacuous.",
+    "file": "tests/steps/dataset.ts",
+    "find": "corruptW[3] += 1n;",
+    "replace": "corruptW[3] += 0n; // MUTATION"
+  },
+  {
+    "name": "M18 Phase D client seeds collapsed to one",
+    "step": 18,
+    "runner": "verify",
+    "expect": "[FAIL] Step 18",
+    "guard": "Step 18 requires two distinct Phase D client seeds, one per Phase D epoch.",
+    "file": "tests/verify.ts",
+    "find": "const byHash = groupByHash(bets);",
+    "replace": "{ const d = bets.filter(b => b.phase === 'D'); for (const b of d) b.seed.clientSeed = d[0].seed.clientSeed; } // MUTATION\nconst byHash = groupByHash(bets);"
+  },
+  {
+    "name": "M19 Pass 1 failure count forged",
+    "step": 19,
+    "runner": "verify",
+    "expect": "[FAIL] Step 19",
+    "guard": "Step 19 recounts chi2FailsAtAlpha01 from the shipped rows; a forged scalar disagrees with the recount.",
+    "file": "outputs/simulation-results.json",
+    "find": "\"chi2FailsAtAlpha01\": 0,",
+    "replace": "\"chi2FailsAtAlpha01\": 1,"
+  },
+  {
+    "name": "M19b uniformity statistic forged",
+    "step": 19,
+    "runner": "verify",
+    "expect": "uniformity statistic / p does not recompute",
+    "guard": "Step 19 recomputes each row's without-replacement-corrected grid-uniformity X² from its shipped per-number counts (KENO-20); a forged statistic disagrees.",
+    "file": "outputs/simulation-results.json",
+    "find": "\"correctedChi2\": 37.156922400000006,",
+    "replace": "\"correctedChi2\": 30,"
+  },
+  {
+    "name": "M19d serial sufficient statistic forged",
+    "step": 19,
+    "runner": "verify",
+    "expect": "do not re-derive from the shipped integers",
+    "guard": "Step 19 re-derives r1 exactly from the hit histogram and the shipped Σ x_t·x_{t+1}; a forged pair sum moves the exact r1 far beyond the 1e-9 bound (KENO-20).",
+    "file": "outputs/simulation-results.json",
+    "find": "\"pairSum\": 62802,",
+    "replace": "\"pairSum\": 72802,"
+  },
+  {
+    "name": "M19c Pass 1 replay seed altered",
+    "step": 19,
+    "runner": "verify",
+    "expect": "REPLAY: the first 1000 rounds",
+    "guard": "Step 19 replays the first 1,000 rounds of every config from the pinned seed pairs and requires the artifact's 1K convergence point bit for bit; a seed that is not the one the artifact came from must FAIL (KENO-20 replay).",
+    "file": "src/sim-seeds.ts",
+    "find": "cb39d8adfaa1ebfac13d8e0de174140bc7d4315af7b8e49fb21e42ff69a0346b",
+    "replace": "cb39d8adfaa1ebfac13d8e0de174140bc7d4315af7b8e49fb21e42ff69a0346c"
+  },
+  {
+    "name": "M19e one Pass 1 runs-test p forged just beyond the reproduction bound",
+    "step": 19,
+    "runner": "verify",
+    "expect": "do not re-derive from the shipped integers",
+    "guard": "Step 19 compares each recomputed runs p (normalCDF, libm) and grid-uniformity p (incomplete gamma) to the shipped value at 1e-14 absolute + 1e-12 relative (src/diff.ts numbersAgree), not bit equality, so 1-ulp libm drift across platforms passes; a shipped runsPValue moved by 1e-12 (bound 7.1e-13 at p = 0.700) must still FAIL. The row's serial flag is unchanged, so only the recomputation can catch it.",
+    "file": "outputs/simulation-results.json",
+    "find": "\"runsPValue\": 0.6998821898783252,",
+    "replace": "\"runsPValue\": 0.6998821898793252,"
+  },
+  {
+    "name": "M20 Pass 2 cherry-pick flag count forged",
+    "step": 20,
+    "runner": "verify",
+    "expect": "[FAIL] Step 20",
+    "guard": "Step 20 recounts test_b_cherry_pick_flags from the rows' own p-values; a forged header disagrees.",
+    "file": "outputs/simulation-results.json",
+    "find": "\"test_b_cherry_pick_flags\": 57,",
+    "replace": "\"test_b_cherry_pick_flags\": 50,"
+  },
+  {
+    "name": "M20b early-window histogram forged",
+    "step": 20,
+    "runner": "verify",
+    "expect": "[FAIL] Step 20",
+    "guard": "Step 20 recomputes every row's chi² / p from its shipped histograms and checks full = early + late (KENO-21); moving one early count breaks both.",
+    "file": "outputs/simulation-results.json",
+    "find": "\"earlyCounts\": [\n          1,\n          14,",
+    "replace": "\"earlyCounts\": [\n          2,\n          13,"
+  },
+  {
+    "name": "M20c early window replayed one nonce off",
+    "step": 20,
+    "runner": "verify",
+    "expect": "REPLAY:",
+    "guard": "Step 20 replays every Pass 2 row's early window (nonces 0–49) from the revealed seed and requires the shipped histogram; replaying nonces 1–50 must FAIL (KENO-21, every window re-derived).",
+    "file": "tests/steps/simulation.ts",
+    "find": "for (let nonce = 0; nonce < EW; nonce++) draws.push(computeDrawFromBuffer(key, cs, nonce,",
+    "replace": "for (let nonce = 0; nonce < EW; nonce++) draws.push(computeDrawFromBuffer(key, cs, nonce + 1,"
+  },
+  {
+    "name": "M20d served return collapsed to zero hits",
+    "step": 20,
+    "runner": "verify",
+    "expect": "[FAIL] Step 20",
+    "guard": "The pre-registered return statistic must be able to fail: if every served bet paid its zero-hit cell, the return of the captured window sits far below its exact null and the bootstrap lower-tail p is < 0.01 (KENO-21).",
+    "file": "tests/steps/simulation.ts",
+    "find": "const hits = b.request.selected_positions.filter(q => draw.includes(q)).length;",
+    "replace": "const hits = 0; // MUTATION"
+  },
+  {
+    "name": "M20e one Pass 2 p-value forged just beyond the reproduction bound",
+    "step": 20,
+    "runner": "verify",
+    "expect": "chi² / p does not recompute from its shipped histograms",
+    "guard": "Step 20 compares each recomputed chi² / p to the shipped value at 1e-14 absolute + 1e-12 relative (the reproduction rule), not bit equality, so 1-ulp libm drift across platforms passes; a shipped p moved by 1e-12 (bound 8.3e-13 at p = 0.816) must still FAIL. The flag outcome of the row is unchanged, so only the recomputation can catch it.",
+    "file": "outputs/simulation-results.json",
+    "find": "\"full_range_p\": 0.8164065233441575,",
+    "replace": "\"full_range_p\": 0.8164065233451575,"
+  },
+  {
+    "name": "M21 pinned artifact bytes changed with every value intact",
+    "step": 21,
+    "runner": "verify",
+    "expect": "[FAIL] Step 21",
+    "guard": "Whitespace-only change to determinism-log.json: every value is intact so the field-level reproduction gate cannot see it; only the byte pin can.",
+    "file": "outputs/determinism-log.json",
+    "find": "\"verified\": 5100",
+    "replace": "\"verified\":  5100"
+  },
+  {
+    "name": "M21b impossible value in a re-pinned artifact",
+    "step": 21,
+    "runner": "verify",
+    "expect": "[FAIL] Step 21",
+    "guard": "Forged evidence: determinism-log.json claims -1 mismatches AND is re-pinned in src/artifact-pins.ts, so the byte pin accepts it; only the value-domain check (bounds from src/domains.ts, never from the artifact) can reject a negative count.",
+    "edits": [
+      {
+        "file": "outputs/determinism-log.json",
+        "find": "\"mismatches\": 0",
+        "replace": "\"mismatches\": -1"
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/artifact-pins.ts",
+        "find": "081193bc8e2965dd7f4bf1b82b2bd232ba2cedb5783f9cd1b96111218500604b",
+        "hashOf": "outputs/determinism-log.json"
+      }
+    ]
+  },
+  {
+    "name": "M22 rejection ceiling removed (naive modulo)",
+    "step": 22,
+    "runner": "verify",
+    "expect": "[FAIL] Step 22",
+    "guard": "With maxFair = 2^32 - 1 the draw is a naive modulo: its bias (1.397e-10 at range 40) sits UNDER the 2^-32 floor and a value >= 0xFFFFFFF0 is so rare that all 5,100 draws still recompute; only Step 22's exactness enumeration can see it.",
+    "file": "src/rng.ts",
+    "find": "return MAX_UINT32 - (MAX_UINT32 % range);",
+    "replace": "return MAX_UINT32; // MUTATION"
+  },
+  {
+    "name": "M22b rejection census under-counted",
+    "step": 22,
+    "runner": "verify",
+    "expect": "[FAIL] Step 22",
+    "guard": "The census is bound to 39 x 5,100 accepted chunks; a draw that stops counting scanned chunks breaks the binding.",
+    "file": "src/rng.ts",
+    "find": "if (census) census.chunksScanned++;",
+    "replace": "/* MUTATION: scanned not counted */"
+  },
+  {
+    "name": "M23 vendored docs-site derive.js edited",
+    "step": 23,
+    "runner": "verify",
+    "expect": "[FAIL] Step 23",
+    "guard": "The vendored docs-site verifier must hash to its pin before it is executed.",
+    "file": "verifier-parity/games/keno/derive.js",
+    "find": "const MAX_U32 = 0xffffffff;",
+    "replace": "const MAX_U32 = 0xffffffff; "
+  },
+  {
+    "name": "M23b vendored live-site chunk edited",
+    "step": 23,
+    "runner": "verify",
+    "expect": "[FAIL] Step 23",
+    "guard": "The vendored live-site bundle must hash to its pins before the runner executes it.",
+    "file": "verifier-parity/live-site/chunks/turbopack-828b80f561e7c968.js",
+    "find": "TURBOPACK",
+    "replace": "TURBOPACK "
+  },
+  {
+    "name": "M23c docs-site derive draws a different set and is re-pinned",
+    "step": 23,
+    "runner": "verify",
+    "expect": "docs-site verifier drew a different set",
+    "guard": "Forged evidence: the vendored derive.js is changed to return positions 1..10 instead of 0..9 AND its pin re-pinned, so the hash check accepts it; executing it on every bet must still expose the different draw.",
+    "edits": [
+      {
+        "file": "verifier-parity/games/keno/derive.js",
+        "find": "const drawnNumbers = positions.slice(0, DRAWN_COUNT).map(p => p + 1)",
+        "replace": "const drawnNumbers = positions.slice(1, DRAWN_COUNT + 1).map(p => p + 1)"
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/site-verifier.ts",
+        "find": "eb5a0c1c0162d885574f87416268d052a9d072450009527ecfb382d853da9749",
+        "hashOf": "verifier-parity/games/keno/derive.js"
+      }
+    ]
+  },
+  {
+    "name": "M23d docs-site paytable cell changed and re-pinned",
+    "step": 23,
+    "runner": "verify",
+    "expect": "docs-site paytables.js differs from kenoConfig.json",
+    "guard": "Forged evidence: one cell of the vendored docs-site paytables.js (HIGH picks=1 hits=1) is changed AND re-pinned, so the hash check accepts it; Step 23 compares the site table with the pinned kenoConfig.json cell for cell and the printed multiplier with the served one on every bet, so it must FAIL (the defect found on the stale repotree-sync build, PV-1).",
+    "edits": [
+      {
+        "file": "verifier-parity/games/keno/paytables.js",
+        "find": "high: {\n    1:  [0, 3.996],",
+        "replace": "high: {\n    1:  [0, 3.95],"
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/site-verifier.ts",
+        "find": "5bce2fd2e6551d7c1f8a8124d6bcf9b842aef656a9fe3cde022ef397c27838f5",
+        "hashOf": "verifier-parity/games/keno/paytables.js"
+      }
+    ]
+  },
+  {
+    "name": "M23e operator Verify-tab file logic changed and re-pinned",
+    "step": 23,
+    "runner": "verify",
+    "expect": "operator Verify-tab code disagrees",
+    "guard": "Forged evidence: Duel's own vendored Keno Verify-tab code is changed (the shuffle's first cursor starts one step late) AND its SHA-256 pin re-computed, so the hash check accepts it; executing it on every bet and comparing with src/rng.ts and the served draw must expose it (KENO-09).",
+    "edits": [
+      {
+        "file": "evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js",
+        "find": "let cursor = gridSize - 1 - i;",
+        "replace": "let cursor = gridSize - i;"
+      }
+    ],
+    "repin": [
+      {
+        "file": "src/operator-verifier.ts",
+        "find": "b75c1ca2667dceef790b574decff8a91506b0bce829b0af47fb1cb22e254930b",
+        "hashOf": "evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js"
+      }
+    ]
+  },
+  {
+    "name": "M23f operator Verify-tab file byte changed without re-pin",
+    "step": 23,
+    "runner": "verify",
+    "expect": "operator Verify-tab code or its runner does not match its pinned SHA-256",
+    "guard": "The vendored operator file must hash to its pin before it runs (KENO-09).",
+    "file": "evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js",
+    "find": "// Code written in javascript",
+    "replace": "// Code written in JavaScript"
+  },
+  {
+    "name": "M23g src/rng.ts cites an operator line that does not carry the quoted text",
+    "step": 23,
+    "runner": "verify",
+    "expect": "src/rng.ts operator citations",
+    "guard": "Every citation in src/rng.ts OPERATOR_SOURCE_CITES must quote the pinned operator file at the line it names (KENO-09).",
+    "file": "src/rng.ts",
+    "find": "{ line: 71, text: 'const j = value % range;'",
+    "replace": "{ line: 72, text: 'const j = value % range;'"
+  },
+  {
+    "name": "MC3a one setting misses its stated figure: E14 CLASSIC 1-pick 0.1 % tier pays 3.956 instead of 3.996",
+    "step": 17,
+    "runner": "test",
+    "expect": "VERDICT: RTP FIGURE OVERSTATED",
+    "expectExit": 5,
+    "regen": [
+      "rtp-table",
+      "record"
+    ],
+    "guard": "FIXPASS2 class C3, 14 Oct 2026: (i) a miss on ONE setting must end RTP FIGURE OVERSTATED, exit 5, never exit 1 or 2. One paytable cell of one stake tier in the game settings no captured bet was priced on (E14 row id 5530, CLASSIC, 1 pick, house_edge 0.001, the 1-hit cell; every captured bet is on the April table) is lowered 3.996 → 3.956: that row returns 98.9 %, 1 pp under its tier's stated 99.9 %. E14's pin is re-made in both files that hold it (repin). Table and record regenerated in the copy, so the package is consistent and the only thing wrong is the miss. Runner test = mocha then verify, as npm test runs them: no unit test, label check, simulation check or operator-FLAG branch may end the run first.",
+    "file": "evidence/keno-config-live-2026-10-05.json",
+    "find": "\"house_edge\":\"0.001\",\"multipliers\":[0,3.996]",
+    "replace": "\"house_edge\":\"0.001\",\"multipliers\":[0,3.956]",
+    "repin": [
+      {
+        "file": "src/rtp-settings.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      },
+      {
+        "file": "src/live-config.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      }
+    ]
+  },
+  {
+    "name": "MC3as the same change as MC3a, RTP table NOT regenerated: a stale table is a reproduction failure",
+    "step": 17,
+    "runner": "verify",
+    "expect": "DIFFERS from this run",
+    "expectExit": 1,
+    "guard": "Ruling 14 Oct 2026 (FIXPASS2): a committed RTP table that does not equal the run or its pin is a reproduction failure, exit 1, miss or no miss. MC3a without regenerating the table must end exit 1 with the table reported as differing, never exit 5: the miss is only reported on a consistent package.",
+    "file": "evidence/keno-config-live-2026-10-05.json",
+    "find": "\"house_edge\":\"0.001\",\"multipliers\":[0,3.996]",
+    "replace": "\"house_edge\":\"0.001\",\"multipliers\":[0,3.956]",
+    "repin": [
+      {
+        "file": "src/rtp-settings.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      },
+      {
+        "file": "src/live-config.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      }
+    ]
+  },
+  {
+    "name": "MC3b the stated figure raised in the claim source: E14 row id 5620 house_edge 0.01 -> 0.007 (stated 99.0 % -> 99.3 %)",
+    "step": 17,
+    "runner": "test",
+    "expect": "VERDICT: RTP FIGURE OVERSTATED",
+    "expectExit": 5,
+    "regen": [
+      "rtp-table",
+      "record"
+    ],
+    "guard": "FIXPASS2 class C3, 14 Oct 2026: (ii) the published figure raised in the claim source itself: the game settings (E14) state house_edge 0.01 for row id 5620 (CLASSIC, 1 pick, bets 83,603–84,459); changed to 0.007, its stated figure is 99.3 % while its multipliers still return 99.0 %, a 0.3 pp house-side miss. E14's pin re-made in both files that hold it (repin); table and record regenerated in the copy. The run must end RTP FIGURE OVERSTATED, exit 5; runner test = mocha then verify, as npm test runs them.",
+    "file": "evidence/keno-config-live-2026-10-05.json",
+    "find": "{\"id\":5620,\"config_id\":3,\"min_bet\":\"83603.566632514353842000\",\"max_bet\":\"84459.457571643433766000\",\"house_edge\":\"0.01\"",
+    "replace": "{\"id\":5620,\"config_id\":3,\"min_bet\":\"83603.566632514353842000\",\"max_bet\":\"84459.457571643433766000\",\"house_edge\":\"0.007\"",
+    "repin": [
+      {
+        "file": "src/rtp-settings.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      },
+      {
+        "file": "src/live-config.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      }
+    ]
+  },
+  {
+    "name": "MC3bs the same change as MC3b, RTP table NOT regenerated: a stale table is a reproduction failure",
+    "step": 17,
+    "runner": "verify",
+    "expect": "DIFFERS from this run",
+    "expectExit": 1,
+    "guard": "Ruling 14 Oct 2026 (FIXPASS2): a committed RTP table that does not equal the run or its pin is a reproduction failure, exit 1, miss or no miss. MC3b without regenerating the table must end exit 1 with the table reported as differing, never exit 5: the miss is only reported on a consistent package.",
+    "file": "evidence/keno-config-live-2026-10-05.json",
+    "find": "{\"id\":5620,\"config_id\":3,\"min_bet\":\"83603.566632514353842000\",\"max_bet\":\"84459.457571643433766000\",\"house_edge\":\"0.01\"",
+    "replace": "{\"id\":5620,\"config_id\":3,\"min_bet\":\"83603.566632514353842000\",\"max_bet\":\"84459.457571643433766000\",\"house_edge\":\"0.007\"",
+    "repin": [
+      {
+        "file": "src/rtp-settings.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      },
+      {
+        "file": "src/live-config.ts",
+        "find": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+        "hashOf": "evidence/keno-config-live-2026-10-05.json"
+      }
+    ]
+  }
+]

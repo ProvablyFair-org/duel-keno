@@ -1,5 +1,4 @@
 {
-  "generatedAt": "2026-09-14T19:53:43.369Z",
   "totalBets": 5100,
   "totalSeeds": 106,
   "datasetHash": {
@@ -17,137 +16,1310 @@
       "step": 1,
       "name": "Seed Hash Integrity",
       "status": "PASS",
-      "detail": "102 revealed seeds verified. 3 phase-boundary skips."
+      "detail": "All 106 seed records in the capture plan are present; records 1–105 each carry a plaintext (seeds[0]'s was filled in after capture and is not read). All 105 transitions accounted for — 102 reveal the preceding entry's commitment, 3 are phase-start rotations, of which 3 repeat the preceding record's plaintext. 4 commitments have no revealed plaintext, 0 of them with bets. 0 records without a plaintext.",
+      "data": {
+        "seedRecords": 106,
+        "expectedSeeds": 106,
+        "verified": 102,
+        "phaseBoundarySkips": 3,
+        "boundaryRepeats": 3,
+        "unrevealedCommitments": 4,
+        "unrevealedCommitmentsWithBets": 0,
+        "unrevealed": 0,
+        "mismatches": 0
+      },
+      "profileIds": [
+        "KENO-01",
+        "KENO-05"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-01",
+          "coverage": "full",
+          "note": "hash half — every revealed seed SHA-256(hexDecode) against the preceding commitment; 102 verified + 3 declared phase-start rotations = EXPECTED_CHAIN_LINKS 105 over EXPECTED_SEEDS 106 code constants, 0 records without a plaintext (counted, never skipped); Step 5 binds the verified seed map to EXPECTED_REVEALED_EPOCHS 102"
+        },
+        {
+          "id": "KENO-05",
+          "coverage": "full",
+          "note": "seed-population half — seed records bound to EXPECTED_SEEDS 106"
+        }
+      ]
     },
     {
       "step": 2,
       "name": "Next-Seed Promotion (Commitment Linkage)",
       "status": "PASS",
-      "detail": "106/106 rotation transitions independently recomputed (previousNextHash === newActiveHash) — next-seed pre-commitment chain intact"
+      "detail": "All 105 epoch transitions recomputed from the raw hashes: each epoch's serverSeedHashed equals the previous epoch's recorded nextServerSeedHash, and the first epoch's active hash equals the pre-capture \"next\" hash. Chain equality is a consistency check on the 106 records, not proof of when a commitment was shown; that each was shown before its epoch's bets rests on the capture's recorded pre-bet observations (capture integrity assumed). The capture script's own `match` flags agree with the recomputation on all 106 records.",
+      "data": {
+        "chainLinksChecked": 105,
+        "chainLinksOk": 105,
+        "expectedChainLinks": 105,
+        "preCaptureLinkPresent": true,
+        "preCaptureLinkVerified": true,
+        "rotationRecords": 106,
+        "captureFlagDisagreements": 0
+      },
+      "profileIds": [
+        "KENO-02"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-02",
+          "coverage": "full",
+          "note": "105/105 nextServerSeedHash → serverSeedHashed links recomputed from raw fields; pre-capture link seeds[0].nextSeedPromotion.previousNextHash verified; an absent link FAILs; the capture script's match flags are cross-checked, never trusted"
+        }
+      ]
     },
     {
       "step": 3,
       "name": "Hash Consistency Within Epoch",
       "status": "PASS",
-      "detail": "All 102 epochs: serverSeedHashed identical across all bets within each epoch"
+      "detail": "Epochs keyed by the capture timeline, not by the bets' own hash: every bet served under each of the 102 bet-bearing rotation records carries that record's committed serverSeedHashed and its clientSeed; the 4 remaining records are the end-of-phase rotations and carry no bets. 0 orphan bets. All 106 committed serverSeedHashed values are pairwise distinct — no seed reused.",
+      "data": {
+        "rotationRecords": 106,
+        "betBearingEpochs": 102,
+        "emptyEpochs": 4,
+        "orphanBets": 0,
+        "distinctCommittedHashes": 106,
+        "disagreements": 0
+      },
+      "profileIds": [
+        "KENO-03"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-03",
+          "coverage": "full",
+          "note": "epochs keyed by the capture timeline (groupByEpochWindow), not by the bets' own hash: every bet in each of the 102 bet-bearing windows carries its rotation record's committed hash AND client seed; 0 orphans; 106/106 committed hashes pairwise distinct"
+        }
+      ]
     },
     {
       "step": 4,
       "name": "Nonce Audit",
-      "status": "PASS",
-      "detail": "102 epochs. 2 capture-retry: 2 reconstructed from revealed seed (no captured server response available for comparison), 0 unverifiable."
+      "status": "FLAG",
+      "detail": "102 epochs checked against the declared base 0 and window of 50, in capture order (no reorder, no repeat) and sorted (no gap), single client seed per epoch. 2 capture-retry epoch(s): the live capture missed exactly one nonce (nonce 50 present, one of 0–49 absent); each missed draw is reconstructed from a revealed server seed whose SHA-256 matches the commitment the capture recorded for that epoch. The auditor did not witness those draws live, so this is a capture-origin FLAG (limitation DL-1 in MANIFEST.md), verdict-neutral. 0 unverifiable.",
+      "data": {
+        "epochsChecked": 102,
+        "expectedEpochs": 102,
+        "nonceBase": 0,
+        "epochSize": 50,
+        "captureRetryEpochs": 2,
+        "reconstructed": 2,
+        "unverifiable": 0,
+        "reorderEpochs": 0,
+        "hardFailures": 0,
+        "reconstructedDraws": [
+          {
+            "epoch": "505951bc32b6b0de",
+            "missedNonce": 7,
+            "reconstructedDraw": [
+              15,
+              8,
+              4,
+              6,
+              30,
+              17,
+              35,
+              40,
+              31,
+              25
+            ]
+          },
+          {
+            "epoch": "5169f71b50f18b74",
+            "missedNonce": 43,
+            "reconstructedDraw": [
+              15,
+              12,
+              35,
+              38,
+              23,
+              2,
+              27,
+              24,
+              5,
+              9
+            ]
+          }
+        ]
+      },
+      "origin": "capture",
+      "profileIds": [
+        "KENO-04"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-04",
+          "coverage": "full",
+          "note": "nonces checked against the DECLARED base NONCE_BASE = 0 (src/loader.ts) and window EPOCH_SIZE 50: reorder/repeat in CAPTURE order (before any sort), gaps after sorting, one client seed per epoch, epoch count bound to 102 — all HARD FAIL. The capture-retry pattern (nonce 50 present, exactly one of 0–49 absent) is reconstructed from the revealed, commitment-matching seed and emitted as a FLAG with origin = capture: counted, limitation DL-1, verdict-neutral (Full Pass, exit 0) — never PASS. FAIL probed (M04, M04b)"
+        }
+      ]
     },
     {
       "step": 5,
-      "name": "Draw Recomputation (RNG determinism)",
+      "name": "Draw Recomputation (RNG + drand absent)",
       "status": "PASS",
-      "detail": "5100/5100 verified, 0 SET mismatches, 0 skipped"
+      "detail": "All 5100 captured bets recomputed from the revealed seed of their epoch — 102/102 epochs revealed, 0 unverifiable, 0 set mismatches. Every served and every recomputed draw is exactly 10 distinct integers in 1–40; every pick set is legal (1–10 distinct numbers in 1–40, request.picks equal to its size) and echoed unchanged with its difficulty. The derivation takes (key, clientSeed, nonce) only — no pick, risk or stake — and recomputes every bet, including 102 epochs whose bets carry different pick sets under one seed pair.",
+      "data": {
+        "bets": 5100,
+        "expectedBets": 5100,
+        "recomputed": 5100,
+        "skipped": 0,
+        "mismatches": 0,
+        "revealedEpochs": 102,
+        "servedStructureViolations": 0,
+        "recomputedStructureViolations": 0,
+        "illegalPickSets": 0,
+        "requestResponseEchoMismatches": 0,
+        "derivationRequiredParams": 3,
+        "epochsWithMultiplePickSets": 102
+      },
+      "profileIds": [
+        "KENO-07",
+        "KENO-10",
+        "KENO-17",
+        "KENO-01",
+        "KENO-05"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-07",
+          "coverage": "full",
+          "note": "5,100/5,100 recomputed as SETS (orderRecorded false — the API order is presentation-only); recomputed count bound to EXPECTED_BETS; an unrecomputable bet is a FAIL, not an exclusion"
+        },
+        {
+          "id": "KENO-10",
+          "coverage": "full",
+          "note": "structure half — every SERVED drawn_numbers and every recomputed draw is exactly 10 distinct integers in 1–40 (a duplicate-padded served array FAILs even though its Set would compare equal); every pick set legal (1–10 distinct numbers in 1–40, request.picks = its size) and echoed unchanged with its difficulty. Hits counted from the recomputed draw: Steps 7, 8, 10. FAIL probed (M05c, M05d)"
+        },
+        {
+          "id": "KENO-17",
+          "coverage": "full",
+          "note": "the derivation declares (key, clientSeed, nonce) as its only required parameters (asserted: computeDrawFromBuffer.length === 3; message clientSeed:nonce:cursor) and recomputes every bet with the picks excluded, across the epochs in which bets under ONE seed pair carry different pick sets (counted, must be ≥ 1). FAIL probed (M05e)"
+        },
+        {
+          "id": "KENO-01",
+          "coverage": "full",
+          "note": "reveal-coverage half — the verified seed map is bound to EXPECTED_REVEALED_EPOCHS 102"
+        },
+        {
+          "id": "KENO-05",
+          "coverage": "full",
+          "note": "bet-population half — bets bound to EXPECTED_BETS 5,100"
+        }
+      ]
     },
     {
       "step": 6,
       "name": "Client Seed Influence",
       "status": "PASS",
-      "detail": "Wrong client seed changed 5100/5100 draws (100.0%) across 102 epochs"
+      "detail": "Substituting a wrong client seed changes the draw for every one of the 5100 bets in every one of the 102 epochs (model rate p = 1/C(40,10), E + 5σ admits 0 collisions); the empty-seed control (clientSeed = \"\") changes all 5100 as well. Disclosed, not scored: the 2 bet-bearing Phase D client seeds are 'pfaudit' + a base-36 wall-clock timestamp (predictable; epochs enumerated in data.phaseDPredictableSeeds, limitation DL-3) and the Phase A–C seeds come from the capture rig's Math.random() generator, which is not a CSPRNG (limitation DL-4).",
+      "data": {
+        "betsTested": 5100,
+        "expectedBets": 5100,
+        "drawsChanged": 5100,
+        "collisions": 0,
+        "collisionProbabilityPerBet": 1.1797175484382116e-9,
+        "expectedCollisions": 0.000006016559497034879,
+        "collisionBound": 0.012270354586819422,
+        "epochsTested": 102,
+        "epochsUnrevealed": 0,
+        "zeroChangeEpochs": 0,
+        "partialEpochs": 0,
+        "emptySeedControl": {
+          "betsTested": 5100,
+          "collisions": 0,
+          "collisionBound": 0.012270354586819422
+        },
+        "phaseDPredictableSeeds": [
+          {
+            "clientSeed": "pfauditmntnvgkk",
+            "serverSeedHashed": "db9860719120f62a32dcda8c0be8899962fd26c746d65e71156e962476e8800a",
+            "decodedWallClock": "2026-04-11T01:33:41.924Z",
+            "rotationRecordAt": "2026-04-11T01:33:42.344Z",
+            "betsUnderIt": 50
+          },
+          {
+            "clientSeed": "pfauditmntnwjdi",
+            "serverSeedHashed": "9ab6ce1c28266f2bb99519d605d58e12c49b5c3426a2ddb64cfea9776e62730e",
+            "decodedWallClock": "2026-04-11T01:34:32.214Z",
+            "rotationRecordAt": "2026-04-11T01:34:33.961Z",
+            "betsUnderIt": 50
+          }
+        ],
+        "phaseABCClientSeeds": {
+          "distinct": 100,
+          "matching16CharAlphanumeric": 100,
+          "generator": "capture/capture-auto.reference.js generateClientSeed: 16 chars from a 62-char alphabet via Math.random() — not a CSPRNG"
+        }
+      },
+      "profileIds": [
+        "KENO-06"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-06",
+          "coverage": "partial",
+          "note": "client-seed-influence half — a wrong client seed changes the draw on all 5,100 bets (model rate p = 1/C(40,10), E = 6.0e-6, E + 5σ admits 0 collisions, so the exact rule is kept) and the EMPTY-SEED CONTROL (clientSeed = \"\") changes all 5,100 on the same bound; FAIL probed (M06, M06b). Phase D recomputation: Steps 9, 18. PARTIAL for one reason: the profile requires the Phase A–C client-seed generator to be a CSPRNG, and the capture rig's generateClientSeed (capture/capture-auto.reference.js) is Math.random(). Classified CAPTURED BEFORE THE STANDARD (capture 2026-04-11, dataset meta.createdAt; requirement from the 2026-09-23 standard); disclosed as MANIFEST DL-4. No verifier change can make the generator a CSPRNG. The predictable Phase D seeds ('pfaudit' + base-36 Date.now()) are enumerated with their epochs in Step 6 data.phaseDPredictableSeeds and disclosed as DL-3"
+        }
+      ]
     },
     {
       "step": 7,
       "name": "Payout Math",
       "status": "PASS",
-      "detail": "5100 bets checked, 0 errors (tolerance 1e-8)"
+      "detail": "5100 bets: amount_won equals amount × the RECOMPUTED table cell rounded to 13 dp, exactly on integer units (no tolerance); every zero-cell bet credits exactly 0; amount_currency echoes the stake on the 18-dp grid.",
+      "data": {
+        "betsChecked": 5100,
+        "expectedBets": 5100,
+        "errors": 0,
+        "offGrid": 0,
+        "currencyEchoMismatches": 0,
+        "betsWithoutRecomputedCell": 0,
+        "payingBets": 2209,
+        "zeroCellBets": 2891,
+        "settlementRule": "amount_won == amount × Number(cell.toFixed(13)), exact on integer units",
+        "multiplierDecimalPlaces": 13,
+        "moneyDecimalPlaces": 18
+      },
+      "profileIds": [
+        "KENO-11",
+        "KENO-10"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-11",
+          "coverage": "full",
+          "note": "EXACT ON THE DECLARED SETTLEMENT RULE (measured on 5,100/5,100 before adoption, src/money.ts): amount_won == amount × round13(RECOMPUTED table cell) on integer units, no tolerance; every zero-cell bet credits exactly 0; amount_currency echoes the stake on the 18-dp grid; an off-grid string is an error. Replaces the relative 1e-12 on parsed doubles that multiplied the SERVED multiplier. FAIL probed (M07: a win moved by 1e-16; M07b: a forged win in a re-pinned dataset)"
+        },
+        {
+          "id": "KENO-10",
+          "coverage": "full",
+          "note": "hit-counting half — hits = |picks ∩ RECOMPUTED draw|; the served draw is compared (Step 8), not used"
+        }
+      ]
     },
     {
       "step": 8,
       "name": "Multiplier Table Provenance",
       "status": "PASS",
-      "detail": "Every captured payout matched its entry in the committed kenoConfig.json multiplier table: 5100 bets checked, 0 mismatches. Captured play exercised 190/260 table rows; unobserved rare-hit rows are covered by the analytic identity in Step 17 (independent hypergeometric probabilities × the committed table), not by direct empirical comparison."
+      "detail": "5100 bets: the served multiplier string equals paytable[risk][picks][hits] of the pinned kenoConfig.json displayed at 13 dp, with hits counted against the recomputed draw (and equal to the hits counted against the served draw on every bet); 40 (risk, picks) rows served, every served cell compared. Table origin: operator config endpoint: kenoConfig.json is a Duel API response envelope {success, data} whose data keys are min_picks, max_picks, numbers_drawn, grid_size, difficulty_levels, multipliers, probabilities, scaling_edge; the package holds no fetch record of the URL (the same envelope and key set are what GET duel.com/api/v2/keno/config returned when read on 2026-09-05, outside this package). The probabilities field is never read by any derivation.",
+      "data": {
+        "betsChecked": 5100,
+        "expectedBets": 5100,
+        "mismatches": 0,
+        "servedVsRecomputedHitDisagreements": 0,
+        "cellsServedAtFullPrecision": 4662,
+        "cellsServedDisplayRounded": 438,
+        "rowsServed": 40,
+        "displayRule": "served == Number(cell.toFixed(13)).toString()",
+        "tableOrigin": "operator config endpoint: kenoConfig.json is a Duel API response envelope {success, data} whose data keys are min_picks, max_picks, numbers_drawn, grid_size, difficulty_levels, multipliers, probabilities, scaling_edge; the package holds no fetch record of the URL (the same envelope and key set are what GET duel.com/api/v2/keno/config returned when read on 2026-09-05, outside this package). The probabilities field is never read by any derivation.",
+        "operatorProbabilityFieldRead": false
+      },
+      "profileIds": [
+        "KENO-13",
+        "KENO-10"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-13",
+          "coverage": "full",
+          "note": "the served multiplier STRING equals Number(cell.toFixed(13)).toString() of paytable[risk][picks][hits] from the pinned kenoConfig.json (display rounding declared: on 4,662 bets the cell is served at full precision, on 438 display-rounded, 0 mismatches), with hits from the recomputed draw; every one of the 40 (risk, picks) rows served is compared; the probabilities field is read by no derivation; origin declared = operator config endpoint (the package holds no fetch record of the URL — stated in the step). FAIL probed (M08)"
+        },
+        {
+          "id": "KENO-10",
+          "coverage": "full",
+          "note": "comparison half — hits on the served draw must equal hits on the recomputed draw on every bet"
+        }
+      ]
     },
     {
       "step": 9,
       "name": "Phase C Bet-Size Invariance (Phase D at $10)",
       "status": "PASS",
-      "detail": "100/100 Phase D bets: draws recomputed correctly at $10, all multipliers match $0.01 table. Equivalence proven deterministically."
+      "detail": "100/100 Phase D bets, all at $10: draws recomputed from the revealed seeds; every served multiplier is the same display-rounded table cell the $0.01 stake is priced by on the same (risk, picks) row (also played at $0.01), and every payout settles by the same exact rule. 0 unrevealed. 43 of the 100 paid: below the profile floor of 100 elevated-stake paying bets — ASSUMED, disclosed as DL-5.",
+      "data": {
+        "phaseDBets": 100,
+        "expectedPhaseDBets": 100,
+        "drawChecked": 100,
+        "drawFails": 0,
+        "multFails": 0,
+        "payFails": 0,
+        "unrevealed": 0,
+        "offStake": 0,
+        "payingBets": 43,
+        "payingFloor": 100,
+        "phaseDPayingFloorMet": false,
+        "rowsAlsoPlayedAtBaseStake": 1
+      },
+      "profileIds": [
+        "KENO-12",
+        "KENO-06"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-12",
+          "coverage": "partial",
+          "note": "what IS asserted: all 100 elevated-stake ($10, 1,000× the $0.01 base) bets recompute, are served the same display-rounded cell as the $0.01 stake on a (risk, picks) row also played at $0.01, and settle by the same exact rule. PARTIAL for one reason: the floor is ≥ 100 elevated-stake PAYING bets and 43 of the 100 paid (MEDIUM picks=10); printed as ASSUMED (phaseDPayingFloorMet false), never silently passed. Searched: the dataset has exactly two stakes (0.01, 10) and 43 paying bets at 10. Classified CAPTURED BEFORE THE STANDARD; DL-5. The profile calls this Phase C; this capture labels it Phase D"
+        },
+        {
+          "id": "KENO-06",
+          "coverage": "partial",
+          "note": "Phase D recomputation half — 100/100 Phase D bets on player-set seeds recompute. PARTIAL for one reason: the profile requires the Phase A–C client-seed generator to be a CSPRNG, and the capture rig's generateClientSeed (capture/capture-auto.reference.js) is Math.random(). Classified CAPTURED BEFORE THE STANDARD (capture 2026-04-11, dataset meta.createdAt; requirement from the 2026-09-23 standard); disclosed as MANIFEST DL-4. No verifier change can make the generator a CSPRNG. The predictable Phase D seeds ('pfaudit' + base-36 Date.now()) are enumerated with their epochs in Step 6 data.phaseDPredictableSeeds and disclosed as DL-3"
+        }
+      ]
     },
     {
       "step": 10,
-      "name": "Configuration Completeness",
+      "name": "Configuration Completeness & Payout-Cell Coverage",
       "status": "PASS",
-      "detail": "40/40 configs covered; missing: none"
+      "detail": "All 40 (risk × picks) configurations carry at least 50 live bets. Payout-cell coverage, and the share of theoretical RTP on cells live play never reached, are itemised in outputs/payout-coverage.json; the whole committed table is covered analytically by step 17.",
+      "data": {
+        "configsCovered": 40,
+        "configsExpected": 40,
+        "minBetsPerConfig": 50,
+        "leanestConfigBets": 73,
+        "totalPayoutCells": 260,
+        "cellsExercisedByLivePlay": 190,
+        "cellsNeverExercised": 70,
+        "uncoveredRtpShareOfTotal": 0.14922729108267638,
+        "phaseAConfigsCovered": 32,
+        "phaseALeanestConfigBets": 73,
+        "phaseACoversAllConfigs": false,
+        "configsPerPhase": {
+          "A": 32,
+          "B": 4,
+          "C": 4,
+          "D": 1
+        },
+        "hitsCountedFrom": "recomputed draw (Step 5)"
+      },
+      "profileIds": [
+        "KENO-15"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-15",
+          "coverage": "partial",
+          "note": "what IS asserted: all 40 configurations ≥ MIN_BETS_PER_CONFIG 50 (leanest 73), asserted in code against the table; 190/260 cells reached, 14.92% of theoretical RTP on unreached cells printed; hits from the recomputed draw. PARTIAL for one reason: the profile asks PHASE A alone to cover every configuration, and this capture plan put picks 2–9 in Phase A (32 configs, leanest 73) and picks 1 / picks 10 in Phases B / C (printed: phaseACoversAllConfigs false). Classified CAPTURED BEFORE THE STANDARD; DL-6"
+        }
+      ]
     },
     {
       "step": 11,
-      "name": "Zero-Edge Audit (scaling_edge absent)",
+      "name": "Captured Edge Fields (pinned scaling_edge empty)",
       "status": "PASS",
-      "detail": "scaling_edge field: [] — flat 0.1% house edge across all configs"
+      "detail": "pinned config scaling_edge field: []; served effective_edge = 0.1 on all 5100 bets, at the captured stakes only ($0.01 and $10) — no edge change between them. No stake above $10 was captured, so this says nothing about the edge above it (DL-9). The flat edge's size (RTP 99.9% on every config) is proven from the table in step 17.",
+      "data": {
+        "scalingEdgeEntries": 0,
+        "servedEdgeCounts": {
+          "0.1": 5100
+        },
+        "offEdgeBets": 0
+      },
+      "profileIds": [],
+      "profileChecks": [],
+      "profileNote": "declarationTruth witness for KENO-31, which is n/a-declared (gameModel.scalingEdge.presentAtCapture = false): the step reads the pinned config (scaling_edge = []) and requires served effective_edge 0.1 on 5,100/5,100 — a populated ladder or any other served edge FAILs it. It witnesses the two captured stakes ($0.01 and $10) only: both are below the lowest threshold ($90.20) of the 5 October 2026 configuration, so the capture cannot show whether a ladder applied above them in April. The ladder in that configuration (E14; start date unknown) is register item DL-9, never read into this population"
     },
     {
       "step": 12,
       "name": "Consolation Payout Disclosure (LOW/MEDIUM picks=1 zero-hit)",
       "status": "PASS",
-      "detail": "LOW picks=1: 0.71× on 0 hits; MEDIUM picks=1: 0.41× on 0 hits — confirmed in multiplier table"
+      "detail": "LOW picks=1: table 0.71× on 0 hits (expected 0.71×); MEDIUM picks=1: table 0.41× on 0 hits (expected 0.41×) — confirmed in multiplier table. Every non-monotone cell of the 260-cell table enumerated: exactly the 2 declared consolation cells, no zero between paying cells, no cell below the one before it. No max-odds / max-payout / max-profit cap is declared by the package or carried by the pinned config (0 limit keys among its 8 data keys) — cap half n/a under proposed rule R2; largest cell value 1200×, held by 4 cells (LOW/10/10, MEDIUM/10/10, HIGH/9/9, HIGH/10/10).",
+      "data": {
+        "LOW_picks1_hits0": 0.71,
+        "MEDIUM_picks1_hits0": 0.41,
+        "nonMonotoneCells": [
+          "consolation LOW/1/0",
+          "consolation MEDIUM/1/0"
+        ],
+        "declaredNonMonotoneCells": [
+          "consolation LOW/1/0",
+          "consolation MEDIUM/1/0"
+        ],
+        "configDataKeys": [
+          "min_picks",
+          "max_picks",
+          "numbers_drawn",
+          "grid_size",
+          "difficulty_levels",
+          "multipliers",
+          "probabilities",
+          "scaling_edge"
+        ],
+        "limitKeysInConfig": [],
+        "capDeclared": false,
+        "largestTableCell": 1200,
+        "largestTableCellCount": 4,
+        "largestTableCellAt": [
+          "LOW/10/10",
+          "MEDIUM/10/10",
+          "HIGH/9/9",
+          "HIGH/10/10"
+        ],
+        "largestServedMultiplier": 510
+      },
+      "profileIds": [
+        "KENO-14"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-14",
+          "coverage": "full",
+          "note": "every non-monotone cell of all 260 is ENUMERATED (consolation on 0 hits, zero between paying cells, a cell below its predecessor) and must equal the declared list — exactly LOW/1/0 0.71× and MEDIUM/1/0 0.41×; FAIL probed (M12, M12b). Cap half under proposed rule R2: no max-odds / max-payout / max-profit is declared by the package or carried by the pinned config (0 limit keys among its 8 data keys) — declared undeclared, n/a with that evidence; the largest cell value, 1,200×, held by four cells (LOW/10/10, MEDIUM/10/10, HIGH/9/9, HIGH/10/10), every one of them listed, and the largest served multiplier 510 printed"
+        }
+      ]
     },
     {
       "step": 13,
       "name": "Population & Phase Labels",
       "status": "PASS",
-      "detail": "5100/5100 bets and 106/106 seed records against the capture plan in src/loader.ts (code constants, not the dataset header); per phase A=3000/3000 B=1000/1000 C=1000/1000 D=100/100; last bet phase: D"
+      "detail": "All 5100 bets and 106 seed records carry valid phase labels, and the population matches the capture plan in src/loader.ts — code constants, not the dataset's own header.",
+      "data": {
+        "betPhases": {
+          "A": 3000,
+          "B": 1000,
+          "C": 1000,
+          "D": 100
+        },
+        "seedPhases": {
+          "A": 61,
+          "B": 21,
+          "C": 21,
+          "D": 3
+        },
+        "bets": 5100,
+        "seeds": 106
+      },
+      "profileIds": [
+        "KENO-05"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-05",
+          "coverage": "full",
+          "note": "bets / seeds / per-phase A 3000 B 1000 C 1000 D 100 and seeds 61/21/21/3 against src/loader.ts constants; the dataset header is never the denominator; no secondary dataset file exists"
+        }
+      ]
     },
     {
       "step": 14,
       "name": "Dataset Hash",
       "status": "PASS",
-      "detail": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9"
+      "detail": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9",
+      "profileIds": [
+        "KENO-26"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-26",
+          "coverage": "full",
+          "note": "dataset AND kenoConfig.json SHA-256 checked before any step (process.exit(1), tests/verify.ts); Step 14 re-confirms the dataset"
+        }
+      ]
     },
     {
       "step": 15,
       "name": "Epoch Size",
       "status": "PASS",
-      "detail": "102 epochs; min=50, max=50 bets per epoch"
+      "detail": "Exactly 102 epochs of exactly 50 bets each, as pinned in src/loader.ts, reconciling to the declared 5100 bets.",
+      "data": {
+        "epochs": 102,
+        "expectedEpochs": 102,
+        "minSize": 50,
+        "maxSize": 50,
+        "expectedSize": 50,
+        "offEpochs": 0
+      },
+      "profileIds": [
+        "KENO-05"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-05",
+          "coverage": "full",
+          "note": "102 epochs × exactly EPOCH_SIZE 50, reconciled to 5,100"
+        }
+      ]
     },
     {
       "step": 16,
       "name": "Hit Symmetry (hypergeometric mode verification)",
       "status": "PASS",
-      "detail": "picks=10: mode of hypergeometric hit distribution = 2 (expected 2 or 3, E[hits]=2.5)"
+      "detail": "picks=10: the mode of the hypergeometric hit distribution is 2, within {2, 3} straddling E[hits]=2.5",
+      "data": {
+        "picks": 10,
+        "mode": 2,
+        "modeProbability": 0.3107159249486724,
+        "expectedHits": 2.5
+      },
+      "profileIds": [
+        "KENO-18"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-18",
+          "coverage": "full",
+          "note": "mode half — picks=10 mode of the independent hypergeometric law in {2, 3}"
+        }
+      ]
     },
     {
       "step": 17,
       "name": "Probability Independence (Anti-Circularity)",
       "status": "PASS",
-      "detail": "Given Duel's committed multiplier table (kenoConfig.json), independently-derived hypergeometric probabilities P(k) = C(picks,k)×C(40-picks,10-k)/C(40,10) yield 99.9% RTP for all 40 configurations (analytic identity over the full table). Max deviation: 0.000000% (CLASSIC/picks=2 (RTP=99.900000%)). The hit probabilities are derived independently from the RNG analysis; the multiplier table is operator-supplied. Live play (Step 8) exercised 190/260 table rows and matched every captured payout; rare high-hit rows that did not occur in the 5,100-bet sample are evaluated against the committed table via this identity rather than empirically."
+      "detail": "All 40 configs: RTP proven via independent hypergeometric P(k) = C(picks,k)×C(40-picks,10-k)/C(40,10). Every config's RTP equals 99.9% to within 3.552713678800501e-15 (16 × double-precision epsilon, the floating-point error bound of the sum); the widest deviation is on CLASSIC/picks=2. EXACT: for every picks count 1–10 the weights sum to C(40,10) and the mean is picks·10/40 in integer arithmetic, and the P(k) used everywhere is the correctly rounded exact law; exact rational RTP from the table literals equals 999/1000 on 16 of 40 configs and lies within 16ε on all 40 (the others disclosed with their magnitude, DL-7); both negative controls rejected.",
+      "data": {
+        "configs": 40,
+        "deviationBound": 3.552713678800501e-15,
+        "maxDeviation": 1.1102230246251565e-16,
+        "worstConfig": "CLASSIC/picks=2",
+        "worstConfigRTP": 0.9990000000000001,
+        "targetRTP": 0.999,
+        "exact": {
+          "picksCountsEnumerated": 10,
+          "lawFailures": 0,
+          "floatProbabilityMismatches": 0,
+          "configsExactlyEqualClaim": 16,
+          "configsDifferingFromClaim": 24,
+          "configsBeyond16Epsilon": 0,
+          "worstDeltaAt": "HIGH/picks=10",
+          "worstDeltaExact": "123093/1093755520000000000000",
+          "worstDelta": 1.125416034471762e-16,
+          "deltaSpread": {
+            "min": -9.191377612430244e-17,
+            "max": 1.125416034471762e-16
+          },
+          "perConfigDelta": {
+            "CLASSIC/1": 0,
+            "CLASSIC/2": 0,
+            "CLASSIC/3": 0,
+            "CLASSIC/4": -9.191377612430244e-17,
+            "CLASSIC/5": -1.09421162052741e-17,
+            "CLASSIC/6": 0,
+            "CLASSIC/7": 2.4619761461866724e-17,
+            "CLASSIC/8": 1.0086641665589034e-16,
+            "CLASSIC/9": -4.7670382500103863e-17,
+            "CLASSIC/10": 2.955481489637087e-17,
+            "LOW/1": 0,
+            "LOW/2": 1.923076923076923e-17,
+            "LOW/3": 0,
+            "LOW/4": 0,
+            "LOW/5": 2.4619761461866724e-17,
+            "LOW/6": 2.626107889265784e-18,
+            "LOW/7": -3.4123311213094494e-17,
+            "LOW/8": -1.1365757495788455e-17,
+            "LOW/9": 1.0728540140304845e-17,
+            "LOW/10": -6.370474761566342e-18,
+            "MEDIUM/1": 0,
+            "MEDIUM/2": 0,
+            "MEDIUM/3": 0,
+            "MEDIUM/4": 0,
+            "MEDIUM/5": 3.009081956450378e-17,
+            "MEDIUM/6": -2.8011817485501695e-17,
+            "MEDIUM/7": 1.1263943152488044e-17,
+            "MEDIUM/8": 1.0919880888921138e-16,
+            "MEDIUM/9": -4.626429862497974e-17,
+            "MEDIUM/10": 1.0877939570639061e-17,
+            "HIGH/1": 0,
+            "HIGH/2": 0,
+            "HIGH/3": 0,
+            "HIGH/4": 0,
+            "HIGH/5": -2.18842324105482e-17,
+            "HIGH/6": 0,
+            "HIGH/7": 2.2881895946911427e-17,
+            "HIGH/8": 5.3540301218319796e-18,
+            "HIGH/9": -3.8104895690035005e-17,
+            "HIGH/10": 1.125416034471762e-16
+          },
+          "servedMultiplierRtpWorstDeltaAt": "LOW/picks=10",
+          "servedMultiplierRtpWorstDeltaExact": "-7641/1059575660000000000",
+          "servedMultiplierRtpWorstDelta": -7.2113774300931e-15,
+          "negativeControls": {
+            "corruptedWeightRejected": true,
+            "corruptedTableCellRejected": true
+          }
+        },
+        "rtpClaim": {
+          "rule": "RTP-CLAIM",
+          "ruleVersion": "1.2.0 (Methodology v1.1: places, per-setting, stake tiers, noted, published, RTP Figure Overstated; agreed 2026-10-14; 1.1.0 2026-10-01; 1.0.0 2026-09-29)",
+          "enforced": true,
+          "status": "PASS",
+          "outcome": "PASS",
+          "claimKind": "tiered",
+          "bandPp": "0.10",
+          "settings": 2712,
+          "houseSideBeyondBand": 0,
+          "playerFavourableBeyondBand": 0,
+          "unstated": 0,
+          "worst": {
+            "setting": "live-2026-10-05 risk=CLASSIC picks=5 house_edge=0.0049 bet 28134.85443866390051–28717.174295956523565",
+            "gapPp": "0.000000"
+          },
+          "trueMin": {
+            "setting": "live-2026-10-05 risk=LOW picks=1 house_edge=0.01 bet 983346.462246445007622–993259.519384399522096",
+            "rtpPct": "99.000000"
+          },
+          "trueMax": {
+            "setting": "live-2026-10-05 risk=MEDIUM picks=10 house_edge=0.001 bet 0–2502.085070892410386",
+            "rtpPct": "99.900000"
+          },
+          "table": "outputs/rtp-claim-table.json",
+          "tableMatchesRunAndPin": true
+        }
+      },
+      "profileIds": [
+        "KENO-18",
+        "KENO-19"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-18",
+          "coverage": "full",
+          "note": "EXACT: for every picks count 1–10, Σ_k C(n,k)·C(40−n,10−k) = C(40,10) and 40·Σ k·w(k) = n·10·C(40,10) in BigInt; the double P(k) used by every step equals the correctly rounded exact law (0 mismatches); the operator probabilities field is never read; NEGATIVE CONTROLS in the step — a weight corrupted by one unit and a table cell corrupted by one unit in its last place are both rejected (a control not rejected FAILs). FAIL probed (M17: an unreached cell changed in a re-pinned config; M17b, M17c: the two controls neutered)"
+        },
+        {
+          "id": "KENO-19",
+          "coverage": "partial",
+          "note": "what IS asserted: per-config RTP in exact rational arithmetic from the table literals, compared with 999/1000, spread printed (data.exact.perConfigDelta); 16 of 40 configs equal 999/1000 exactly, all 40 within 16ε (worst |Δ| 1.125e-16, HIGH/picks=10). THE CLAIM IS SCORED HERE: RTP-CLAIM 1.2.0 is switched on (src/rtp-claim-switch.ts, decision D3, 14 Oct 2026) and holds every row of outputs/rtp-claim-table.json (the 40 April configs on their served 13-dp multipliers and every stake tier of E14) to 1 minus the edge Duel's game settings state for its tier, band 0.1 pp; a house-side row beyond the band makes this step an operator-origin FLAG and the verdict RTP FIGURE OVERSTATED, exit 5 (tests/verify.ts; outcome in this step's data.rtpClaim; FAIL probed MC3a, MC3b). PARTIAL for one reason: the profile makes ANY config whose derived RTP differs from the claim a FLAG; the rule flags only a difference beyond its 0.1 pp band, so the 24 configs that differ from 999/1000 by at most 1.125e-16 are disclosed with their magnitude as register item DL-7 (and the served 13-dp multipliers, worst |Δ| 7.2e-15, DL-8), not flagged"
+        }
+      ]
     },
     {
       "step": 18,
       "name": "Phase D — Client Seed Variation",
       "status": "PASS",
-      "detail": "100 bets at $10, 2 distinct client seeds, configs: MEDIUM|10"
+      "detail": "100 bets at $10, 2 distinct client seeds, configs: MEDIUM|10",
+      "data": {
+        "phaseDBets": 100,
+        "expectedPhaseDBets": 100,
+        "distinctClientSeeds": 2,
+        "expectedClientSeeds": 2
+      },
+      "profileIds": [
+        "KENO-06"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-06",
+          "coverage": "partial",
+          "note": "Phase D ≥ 2 distinct client seeds (2, one per Phase D epoch). PARTIAL for one reason: the profile requires the Phase A–C client-seed generator to be a CSPRNG, and the capture rig's generateClientSeed (capture/capture-auto.reference.js) is Math.random(). Classified CAPTURED BEFORE THE STANDARD (capture 2026-04-11, dataset meta.createdAt; requirement from the 2026-09-23 standard); disclosed as MANIFEST DL-4. No verifier change can make the generator a CSPRNG. The predictable Phase D seeds ('pfaudit' + base-36 Date.now()) are enumerated with their epochs in Step 6 data.phaseDPredictableSeeds and disclosed as DL-3"
+        }
+      ]
     },
     {
       "step": 19,
       "name": "Simulation Results — Pass 1 Integrity",
       "status": "PASS",
-      "detail": "40,000,000 rounds × 40 configs; avg RTP=99.9704%. 0/40 configs fail at Bonferroni-corrected threshold (α/40 = 0.00025). 0/40 flag even at uncorrected α = 0.01."
+      "detail": "40,000,000 rounds × 40 configs; every row's chi²/p and simulated RTP recomputed from its shipped hit histogram; grid uniformity (without-replacement corrected X² on 40 numbers) recomputed from each row's per-number counts — 0/40 fail at α/40; serial r1 re-derived exactly from shipped integer sufficient statistics (bound 1e-9) and runs z / p recomputed; first 1000 rounds of every config replayed from the pinned seeds, 1K convergence point equal. 0/40 configs fail at the Bonferroni-corrected threshold (α/40). 0/40 flag even at uncorrected α = 0.01.",
+      "data": {
+        "totalRounds": 40000000,
+        "configs": 40,
+        "rows": 40,
+        "avgSimulatedRTP": 0.9997041044329074,
+        "alpha": 0.01,
+        "bonferroniAlpha": 0.00025,
+        "chi2FailsBonferroni": 0,
+        "serialFailsBonferroni": 0,
+        "chi2FailsUncorrected": 0,
+        "serialFailsUncorrected": 0,
+        "rowsNotRecomputing": 0,
+        "artifactIssues": 0,
+        "uniformityFailsBonferroni": 0,
+        "uniformityFailsUncorrected": 0,
+        "uniformityRowsNotRecomputing": 0,
+        "serialRowsNotRederiving": 0,
+        "serialR1WorstGap": 2.9752188126369594e-14,
+        "serialR1Tolerance": 1e-9,
+        "runsTestDegenerateConfigs": 8,
+        "replay": {
+          "roundsPerConfig": 1000,
+          "configs": 40,
+          "meanRTP": 0.996246680282494,
+          "matchesArtifact": true
+        }
+      },
+      "profileIds": [
+        "KENO-20"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-20",
+          "coverage": "full",
+          "note": "40 × 1,000,000 rounds on the 40 pinned seed pairs (src/sim-seeds.ts); every statistic re-derived in verify from the artifact's rows: hit-histogram chi²/p and simulated RTP (0/40 at Bonferroni); GRID UNIFORMITY with the without-replacement correction (X²·39/30 ~ χ²₃₉) from each row's shipped 40 per-number counts — 0/40 at Bonferroni, min p 0.0744; SERIAL: r1 re-derived EXACTLY (BigInt) from the histogram and shipped Σx_t·x_{t+1}, first, last (worst gap to the stored float 2.98e-14, bound 1e-9) and runs z / p recomputed from shipped runs / median / n1 — 0/40 at Bonferroni; REPLAY: the first 1,000 rounds of every config are replayed in verify and the 1K convergence point equals the artifact bit for bit, and a full test:full regeneration (2026-09-25) reproduced all 57,126 leaves (22,706 pre-existing leaves identical to the previous pin, 34,420 added). Disclosed (DL-11): on 8 configs (picks 1 and 2, every risk) the runs test is degenerate — every round is at or above the median — so its z is 0 and serial independence there rests on the lag-1 statistic. FAIL probed (M19, M19b, M19c, M19d)"
+        }
+      ]
     },
     {
       "step": 20,
       "name": "Simulation Results — Pass 2 Cherry-Pick Test",
       "status": "PASS",
-      "detail": "1666 seed×config combos; Test A: 13/1666 fails (expected ≤17); Test B: 57/1666 flags (expected ≤80 under H₀); 57 isolated-early, 0 broad — distributional noise confirmed"
+      "detail": "1666 seed×config combos = every combination played in the dataset, on all 102 revealed seeds; counts re-scored from the rows. Test A: 13/1666 fail at α = 0.01 — within H₀ (binomial P(X ≥ 13) ≥ 0.01). Test B: 57/1666 early-only flags — within H₀ (binomial P(X ≥ 57) ≥ 0.01). Every row's full / early / late chi² / p recomputed from its shipped histograms and the early window replayed from the revealed seed. Return of the 5100 served bets in the captured window vs its exact null: z computed, bootstrap lower-tail p ≥ 0.01 (B = 10000, pre-registered rule); detection power in data.",
+      "data": {
+        "seedConfigCombinations": 1666,
+        "combinationsPlayedInDataset": 1666,
+        "testAFails": 13,
+        "testABinomialP": 0.848283007970132,
+        "cherryPickFlags": 57,
+        "cherryPickBinomialP": 0.9992459501938377,
+        "bothWindowsSignificant": 4,
+        "artifactIssues": 0,
+        "rowsNotRecomputing": 0,
+        "earlyWindowReplayMismatches": 0,
+        "returnStatistic": {
+          "bets": 5100,
+          "observedReturn": 5656.709146672921,
+          "nullMean": 5094.89999999942,
+          "nullVariance": 141582.02588186893,
+          "z": 1.4930857287791033,
+          "pCltLowerTail": 0.9322925944703737,
+          "bootstrapReplicates": 10000,
+          "bootstrapSeed": "0x6b656e6f (mulberry32)",
+          "pBootstrapLowerTail": 0.9194080591940806,
+          "rule": "FAIL if the bootstrap lower-tail p < 0.01 (pre-registered)",
+          "detectablePerBetReturnDeficitAt80Power": 0.23373019585180668
+        }
+      },
+      "profileIds": [
+        "KENO-21"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-21",
+          "coverage": "full",
+          "note": "all 102 revealed seeds × 10,000 nonces on the configs each epoch served (1,666 combos); every row's full / early / late chi² / p re-derived in verify from its shipped histograms (full = early + late) and every early window (nonces 0–49) REPLAYED from the revealed seed; THE RETURN STATISTIC: the return of the 5,100 served bets in the captured window (hits on the recomputed draw) against its exact null mean and variance from the hypergeometric law and the table — z +1.49, parametric-bootstrap lower-tail p 0.919 (B = 10,000, fixed seed), pre-registered rule FAIL if p < 0.01; DETECTION POWER printed: a per-bet return deficit of 0.234× is detectable at 80% power (one-sided α 0.01). Disclosed: the simulated early window is 0–49, while two capture-retry epochs also hold a captured bet at nonce 50 — those two bets are in the return statistic but not in the 0–49 histograms. FAIL probed (M20, M20b, M20c, M20d)"
+        }
+      ]
     },
     {
       "step": 21,
       "name": "Artifact Integrity (pinned artifacts of record)",
       "status": "PASS",
-      "detail": "2 artifact(s) checked against src/artifact-pins.ts; rtp-convergence.html matches its pin; simulation-results.json matches its pin"
+      "detail": "5 artifact(s) checked against src/artifact-pins.ts; chi-squared-results.json matches its pin; determinism-log.json matches its pin; payout-coverage.json matches its pin; rtp-convergence.html matches its pin; simulation-results.json matches its pin. Value domains (src/domains.ts): 53196 numeric leaves in 4 artifacts, 0 outside their domain, 0 without a declared domain",
+      "data": {
+        "artifactsPinned": 5,
+        "mismatches": 0,
+        "domainLeavesChecked": 53196,
+        "domainViolations": 0,
+        "leavesWithoutDomain": 0
+      },
+      "profileIds": [
+        "KENO-27"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-27",
+          "coverage": "full",
+          "note": "5 artifacts pinned in src/artifact-pins.ts and matched, all un-ignored by name; verify writes only to outputs/run/; no artifact carries run metadata (the simulation's generatedAt / executionTimeMs removed 2026-09-25 by a regeneration whose every other leaf equals the old pin, not by editing); every numeric leaf of the four JSON artifacts has a value domain derived from src/ (src/domains.ts) and Step 21 checks both directions — every leaf inside its domain, every numeric path covered. Derived statistics are compared at the reproduction tolerance by the gate, never by bytes. FAIL probed (M21 byte-only change, M21b impossible value in a re-pinned artifact)"
+        }
+      ]
+    },
+    {
+      "step": 22,
+      "name": "Draw Bias Bound (rejection ceiling, every range enumerated)",
+      "status": "PASS",
+      "detail": "All 39 ranges the backward shuffle uses (40 … 2) enumerated over all 2^32 chunk values with the draw's own maxFair: on every range the accepted count is a whole multiple of the range, so each index is selected by exactly the same number of values — bias exactly 0 (profile floor 2^-32). Largest rejection: 32 of 2^32 values at range 32 (maxFair 0xFFFFFFE0). Rejection census over the 5100 recomputed draws: 0 chunk(s) rejected, 0 cursor advance(s), 198900 chunks accepted = 39 × 5100.",
+      "data": {
+        "rangesEnumerated": 39,
+        "nonExactRanges": 0,
+        "rangesBeyond2pow32": 0,
+        "largestRejection": 32,
+        "largestRejectionRange": 32,
+        "expectedRejectedChunksPerDraw": 8.381903171539307e-8,
+        "census": {
+          "hmacCalls": 198900,
+          "chunksScanned": 198900,
+          "chunksRejected": 0,
+          "cursorAdvances": 0
+        },
+        "shuffleSteps": 198900,
+        "ranges": [
+          {
+            "range": 40,
+            "maxFair": 4294967280,
+            "accepted": "4294967280",
+            "rejected": 16,
+            "biasNum": "0",
+            "biasDen": "171798691200",
+            "exact": true
+          },
+          {
+            "range": 39,
+            "maxFair": 4294967274,
+            "accepted": "4294967274",
+            "rejected": 22,
+            "biasNum": "0",
+            "biasDen": "167503723686",
+            "exact": true
+          },
+          {
+            "range": 38,
+            "maxFair": 4294967290,
+            "accepted": "4294967290",
+            "rejected": 6,
+            "biasNum": "0",
+            "biasDen": "163208757020",
+            "exact": true
+          },
+          {
+            "range": 37,
+            "maxFair": 4294967289,
+            "accepted": "4294967289",
+            "rejected": 7,
+            "biasNum": "0",
+            "biasDen": "158913789693",
+            "exact": true
+          },
+          {
+            "range": 36,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "154618822512",
+            "exact": true
+          },
+          {
+            "range": 35,
+            "maxFair": 4294967285,
+            "accepted": "4294967285",
+            "rejected": 11,
+            "biasNum": "0",
+            "biasDen": "150323854975",
+            "exact": true
+          },
+          {
+            "range": 34,
+            "maxFair": 4294967278,
+            "accepted": "4294967278",
+            "rejected": 18,
+            "biasNum": "0",
+            "biasDen": "146028887452",
+            "exact": true
+          },
+          {
+            "range": 33,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "141733920636",
+            "exact": true
+          },
+          {
+            "range": 32,
+            "maxFair": 4294967264,
+            "accepted": "4294967264",
+            "rejected": 32,
+            "biasNum": "0",
+            "biasDen": "137438952448",
+            "exact": true
+          },
+          {
+            "range": 31,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "133143986052",
+            "exact": true
+          },
+          {
+            "range": 30,
+            "maxFair": 4294967280,
+            "accepted": "4294967280",
+            "rejected": 16,
+            "biasNum": "0",
+            "biasDen": "128849018400",
+            "exact": true
+          },
+          {
+            "range": 29,
+            "maxFair": 4294967280,
+            "accepted": "4294967280",
+            "rejected": 16,
+            "biasNum": "0",
+            "biasDen": "124554051120",
+            "exact": true
+          },
+          {
+            "range": 28,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "120259084176",
+            "exact": true
+          },
+          {
+            "range": 27,
+            "maxFair": 4294967274,
+            "accepted": "4294967274",
+            "rejected": 22,
+            "biasNum": "0",
+            "biasDen": "115964116398",
+            "exact": true
+          },
+          {
+            "range": 26,
+            "maxFair": 4294967274,
+            "accepted": "4294967274",
+            "rejected": 22,
+            "biasNum": "0",
+            "biasDen": "111669149124",
+            "exact": true
+          },
+          {
+            "range": 25,
+            "maxFair": 4294967275,
+            "accepted": "4294967275",
+            "rejected": 21,
+            "biasNum": "0",
+            "biasDen": "107374181875",
+            "exact": true
+          },
+          {
+            "range": 24,
+            "maxFair": 4294967280,
+            "accepted": "4294967280",
+            "rejected": 16,
+            "biasNum": "0",
+            "biasDen": "103079214720",
+            "exact": true
+          },
+          {
+            "range": 23,
+            "maxFair": 4294967284,
+            "accepted": "4294967284",
+            "rejected": 12,
+            "biasNum": "0",
+            "biasDen": "98784247532",
+            "exact": true
+          },
+          {
+            "range": 22,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "94489280424",
+            "exact": true
+          },
+          {
+            "range": 21,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "90194313132",
+            "exact": true
+          },
+          {
+            "range": 20,
+            "maxFair": 4294967280,
+            "accepted": "4294967280",
+            "rejected": 16,
+            "biasNum": "0",
+            "biasDen": "85899345600",
+            "exact": true
+          },
+          {
+            "range": 19,
+            "maxFair": 4294967290,
+            "accepted": "4294967290",
+            "rejected": 6,
+            "biasNum": "0",
+            "biasDen": "81604378510",
+            "exact": true
+          },
+          {
+            "range": 18,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "77309411256",
+            "exact": true
+          },
+          {
+            "range": 17,
+            "maxFair": 4294967295,
+            "accepted": "4294967295",
+            "rejected": 1,
+            "biasNum": "0",
+            "biasDen": "73014444015",
+            "exact": true
+          },
+          {
+            "range": 16,
+            "maxFair": 4294967280,
+            "accepted": "4294967280",
+            "rejected": 16,
+            "biasNum": "0",
+            "biasDen": "68719476480",
+            "exact": true
+          },
+          {
+            "range": 15,
+            "maxFair": 4294967295,
+            "accepted": "4294967295",
+            "rejected": 1,
+            "biasNum": "0",
+            "biasDen": "64424509425",
+            "exact": true
+          },
+          {
+            "range": 14,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "60129542088",
+            "exact": true
+          },
+          {
+            "range": 13,
+            "maxFair": 4294967287,
+            "accepted": "4294967287",
+            "rejected": 9,
+            "biasNum": "0",
+            "biasDen": "55834574731",
+            "exact": true
+          },
+          {
+            "range": 12,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "51539607504",
+            "exact": true
+          },
+          {
+            "range": 11,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "47244640212",
+            "exact": true
+          },
+          {
+            "range": 10,
+            "maxFair": 4294967290,
+            "accepted": "4294967290",
+            "rejected": 6,
+            "biasNum": "0",
+            "biasDen": "42949672900",
+            "exact": true
+          },
+          {
+            "range": 9,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "38654705628",
+            "exact": true
+          },
+          {
+            "range": 8,
+            "maxFair": 4294967288,
+            "accepted": "4294967288",
+            "rejected": 8,
+            "biasNum": "0",
+            "biasDen": "34359738304",
+            "exact": true
+          },
+          {
+            "range": 7,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "30064771044",
+            "exact": true
+          },
+          {
+            "range": 6,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "25769803752",
+            "exact": true
+          },
+          {
+            "range": 5,
+            "maxFair": 4294967295,
+            "accepted": "4294967295",
+            "rejected": 1,
+            "biasNum": "0",
+            "biasDen": "21474836475",
+            "exact": true
+          },
+          {
+            "range": 4,
+            "maxFair": 4294967292,
+            "accepted": "4294967292",
+            "rejected": 4,
+            "biasNum": "0",
+            "biasDen": "17179869168",
+            "exact": true
+          },
+          {
+            "range": 3,
+            "maxFair": 4294967295,
+            "accepted": "4294967295",
+            "rejected": 1,
+            "biasNum": "0",
+            "biasDen": "12884901885",
+            "exact": true
+          },
+          {
+            "range": 2,
+            "maxFair": 4294967294,
+            "accepted": "4294967294",
+            "rejected": 2,
+            "biasNum": "0",
+            "biasDen": "8589934588",
+            "exact": true
+          }
+        ]
+      },
+      "profileIds": [
+        "KENO-08"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-08",
+          "coverage": "full",
+          "note": "all 39 ranges the backward shuffle uses (40 … 2) ENUMERATED over all 2^32 chunk values with the draw's own maxFairFor: maxFair per range printed (range 40: 0xFFFFFFF0, 16 rejected), the accepted count a whole multiple of every range → bias exactly 0 (profile floor 2^-32; exactness is the declared property, so a naive modulo — 1.397e-10, under the floor — still FAILs); rejection census over the 5,100 recomputed draws bound to 39 × 5,100 accepted chunks. FAIL probed (M22, M22b)"
+        }
+      ]
+    },
+    {
+      "step": 23,
+      "name": "Player-Verifier Parity (docs-site + live-site)",
+      "status": "PASS",
+      "detail": "Both player verifiers executed from their pinned bytes on all 5100 bets: the docs-site derive.js (mikepforg/pf-audit-duel @ bd4d59c) and the live https://www.provablyfair.org/verify-bets bundle each print the drawn set this package recomputes on every bet; the docs-site paytables.js equals the pinned kenoConfig.json on 260 of 260 cells and the multiplier it prints equals the served one on 5100 of 5100 bets. The live page prints no Keno multiplier. Duel's own Keno Verify-tab code (evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js, copied 2026-09-25, SHA-256-pinned) executed unmodified on 5100 of 5100 bets returns src/rng.ts's draw in the same shuffled order on every bet and the served draw as a set on every bet (0 / 0 differ); operator lines cited by src/rng.ts 18/18 verbatim.",
+      "data": {
+        "siteFiles": [
+          {
+            "file": "games/keno/derive.js",
+            "pinned": "eb5a0c1c0162d885574f87416268d052a9d072450009527ecfb382d853da9749",
+            "actual": "eb5a0c1c0162d885574f87416268d052a9d072450009527ecfb382d853da9749",
+            "match": true
+          },
+          {
+            "file": "games/keno/paytables.js",
+            "pinned": "5bce2fd2e6551d7c1f8a8124d6bcf9b842aef656a9fe3cde022ef397c27838f5",
+            "actual": "5bce2fd2e6551d7c1f8a8124d6bcf9b842aef656a9fe3cde022ef397c27838f5",
+            "match": true
+          },
+          {
+            "file": "lib/hmac-sha256.js",
+            "pinned": "bc30bfe9ef202905ece93de33440d41851abf16e910f90c2a567774a2b79d889",
+            "actual": "bc30bfe9ef202905ece93de33440d41851abf16e910f90c2a567774a2b79d889",
+            "match": true
+          }
+        ],
+        "siteChecked": 5100,
+        "siteDrawMismatches": 0,
+        "siteThrew": 0,
+        "sitePaytableCellsCompared": 260,
+        "sitePaytableCellsDiffering": 0,
+        "siteMultiplierDiffersFromServed": 0,
+        "siteMultiplierExamples": [],
+        "liveFiles": [
+          {
+            "file": "chunks/turbopack-828b80f561e7c968.js",
+            "pinned": "6e8629f444df945f8fecfdfe05e24f4fa6c63b6b1ecc8f39fc45e9c4f4ecc903",
+            "actual": "6e8629f444df945f8fecfdfe05e24f4fa6c63b6b1ecc8f39fc45e9c4f4ecc903",
+            "match": true
+          },
+          {
+            "file": "chunks/34934e0e762aa37e.js",
+            "pinned": "9fb319dec0d79f9bf5851ec8e0052b6b2125e603be03d12b78a0fe99eed817d1",
+            "actual": "9fb319dec0d79f9bf5851ec8e0052b6b2125e603be03d12b78a0fe99eed817d1",
+            "match": true
+          },
+          {
+            "file": "chunks/4f34301b2f166201.js",
+            "pinned": "8111e3f3e9a137888558f69547a19b0238d1c50a339b4c51095f9481785df0f5",
+            "actual": "8111e3f3e9a137888558f69547a19b0238d1c50a339b4c51095f9481785df0f5",
+            "match": true
+          },
+          {
+            "file": "run-live-verifier.cjs",
+            "pinned": "f8b1f9a9ad362f81a88a5ccca16c55d85ca366183bd664e71b8aceaa078d876c",
+            "actual": "f8b1f9a9ad362f81a88a5ccca16c55d85ca366183bd664e71b8aceaa078d876c",
+            "match": true
+          }
+        ],
+        "liveChecked": 5100,
+        "liveDrawMismatches": 0,
+        "liveMissing": 0,
+        "liveStandInModules": 34,
+        "operatorFiles": [
+          {
+            "file": "evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js",
+            "pinned": "b75c1ca2667dceef790b574decff8a91506b0bce829b0af47fb1cb22e254930b",
+            "actual": "b75c1ca2667dceef790b574decff8a91506b0bce829b0af47fb1cb22e254930b",
+            "match": true
+          },
+          {
+            "file": "verifier-parity/operator/run-operator-verifier.cjs",
+            "pinned": "11d84eda568dde7d5db4063af7c0257f0bbfc394ac1c0c05d82a038c571948c4",
+            "actual": "11d84eda568dde7d5db4063af7c0257f0bbfc394ac1c0c05d82a038c571948c4",
+            "match": true
+          }
+        ],
+        "operatorProvenance": {
+          "copiedBy": "Paulo",
+          "copiedOn": "2026-09-25",
+          "from": "duel.com → Provably Fair → Verify, game Keno, Expand → Copy on the code panel (evidence E03 shows the page, panel collapsed)",
+          "savedAs": "evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js",
+          "sha256": "b75c1ca2667dceef790b574decff8a91506b0bce829b0af47fb1cb22e254930b",
+          "bytes": 3138,
+          "lines": 95
+        },
+        "operatorChecked": 5100,
+        "operatorOrderDiffersFromRng": 0,
+        "operatorSetDiffersFromServed": 0,
+        "operatorMissing": 0,
+        "operatorCitesChecked": 18,
+        "operatorCitesBad": 0
+      },
+      "profileIds": [
+        "KENO-24"
+      ],
+      "profileChecks": [
+        {
+          "id": "KENO-24",
+          "coverage": "full",
+          "note": "asserts: \"The site verifier's derive.js for this casino is generated from (or hash-matched to) the adapter's computeDraw; the package records that hash.\" The docs-site verifier (derive.js + paytables.js + lib/hmac-sha256.js, mikepforg/pf-audit-duel origin/main @ bd4d59c, read with git cat-file) and the live www.provablyfair.org/verify-bets bundle (3 chunks + runner) are vendored with their SHA-256 recorded in src/site-verifier.ts / src/live-site-verifier.ts and EXECUTED on all 5,100 bets: each prints the drawn set src/rng.ts computeDraw recomputes on every bet, and the docs-site paytables.js equals kenoConfig.json on 260/260 cells with its printed multiplier equal to the served one on 5,100/5,100 — all scored. FAIL probed (M23, M23b, M23c derive.js changed and re-pinned, M23d paytable cell changed and re-pinned). PV-1 (a stale repotree-sync build with a wrong table) is resolved on main"
+        }
+      ]
     }
   ],
   "informational": [
     {
       "label": "RTP Analysis",
-      "detail": "Empirical RTP: 91.39% over 5,100 bets (high variance at this sample size; theoretical 99.90% proven analytically in Step 16)"
+      "detail": "Empirical RTP: 91.39% over 5,100 bets (high variance at this sample size; theoretical 99.90% proven analytically in Step 17)"
     },
     {
       "label": "Chi-squared Goodness-of-Fit",
       "detail": "40 configs; fails at α=0.01: 0/40; min p=0.1168 (~128 bets/config insufficient; see simulation Step 19)"
+    },
+    {
+      "label": "Hit Counts per Picks Count (KENO-22)",
+      "detail": "10 picks counts, risk pooled; fails at α=0.01: 0/10; min p=0.4798 (informational)"
+    },
+    {
+      "label": "Drawn-Number Uniformity (KENO-22)",
+      "detail": "51000 drawn numbers over 40; X²=28.099, without-replacement corrected 36.528 on df 39, p=0.5832 (uncorrected p=0.9024); informational — a 5100-round sample has little power"
     },
     {
       "label": "Serial Independence (lag-1)",
@@ -159,9 +1331,75 @@
     }
   ],
   "summary": {
-    "passed": 21,
-    "flags": 0,
+    "passed": 22,
+    "flags": 1,
+    "operatorFlags": 0,
+    "captureFlags": 1,
     "hardFail": 0,
     "verdict": "PROVABLY FAIR — Full Pass"
+  },
+  "profileCoverage": {
+    "game": "keno",
+    "profileVersion": "1.0.2",
+    "notApplicable": [
+      {
+        "id": "KENO-16",
+        "reason": "money.balanceField = null: the bet record carries no running balance or wallet field (src/types.ts BetResponse: id, status, amount_currency, amount_won, multiplier, difficulty, selected_positions, drawn_numbers, transaction_id, effective_edge)"
+      },
+      {
+        "id": "KENO-31",
+        "reason": "gameModel.scalingEdge.presentAtCapture = false, and the declarationTruth is checked by Step 11: the pinned kenoConfig.json carries scaling_edge = [] and every one of the 5,100 bets was served effective_edge 0.1. That covers the captured stakes only ($0.01 and $10, both below the lowest threshold, $90.20, of the 5 October 2026 configuration); whether a ladder applied above them in April is not captured. Duel's keno config as fetched on 2026-10-05 (E14, informational) carries a populated scaling_edge ladder whose start date is unknown — a re-certification item, MANIFEST DL-9"
+      }
+    ],
+    "packageChecks": [
+      {
+        "id": "KENO-09",
+        "artifact": "tests/keno/KenoTests.ts (Operator source block) + src/rng.ts OPERATOR_SOURCE_CITES + src/operator-verifier.ts + Step 23",
+        "coverage": "full",
+        "note": "Duel publishes the draw source as the code panel of its Verify tab (E03 shows it collapsed). Paulo copied it verbatim on 2026-09-25 (duel.com → Provably Fair → Verify → Expand → Copy) to evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js (E13, SHA-256 b75c1ca2…), pinned with its runner in src/operator-verifier.ts. The asserts, each met: (1) \"unit tests reproduce captured bets from their revealed seeds … against the operator's published source\" — the Operator source block in tests/keno/KenoTests.ts EXECUTES that file unmodified on all 5,100 captured bets: its generateKenoDrawnNumbers returns src/rng.ts computeDraw's draw in the same shuffled order on 5,100/5,100 and the served drawn_numbers as a set on 5,100/5,100 (the served order is presentation-only: it equals the shuffle order on 0 of 5,100); (2) \"fixed vectors\" — the same block requires it to return the 7 known-answer drawn sets; (3) \"the adapter cites the operator source line it ports\" — src/rng.ts OPERATOR_SOURCE_CITES names 18 lines of the pinned file (L9 drawnCount … L85 1-indexed, shuffled order) with the text each must carry, and checkOperatorCites FAILs any that does not: 18/18. Step 23 runs the same execution and citation check in the verifier. FAIL probed: M23e (a logic line of the operator file changed AND re-pinned → disagreement), M23f (a byte changed without re-pin → hash mismatch), M23g (a citation moved to a line that does not carry its text). Not established: that the Verify button, or Duel's server, runs exactly this code"
+      },
+      {
+        "id": "KENO-22",
+        "artifact": "tests/steps/statistical.ts (informational context, never verdict-bearing)",
+        "coverage": "full",
+        "note": "drawn-number uniformity over all 51,000 captured numbers with the without-replacement correction (X²·39/30 ~ χ²₃₉), hit counts per picks count (10) and per (risk, picks) config (40) against the hypergeometric law; informational only"
+      },
+      {
+        "id": "KENO-23",
+        "artifact": "MANIFEST.md#verification-results",
+        "coverage": "full",
+        "note": "the standardized matrix S5-1 … S5-8 between the S5-MATRIX:START/END markers, each row Pass / Not tested — disclosed, tied to a scored step or the capture"
+      },
+      {
+        "id": "KENO-25",
+        "artifact": "MANIFEST.md#verify-a-bet",
+        "coverage": "full",
+        "note": "MANIFEST \"Verify a bet\" gives, in order and in the declaration's field names, where the seed is revealed, which fields to paste, the commitment encoding, the draw algorithm, the 1-based number base, how hits are counted and which paytable cell pays (and at what display rounding)"
+      },
+      {
+        "id": "KENO-28",
+        "artifact": "package.json + tests/verify.ts + src/simulate.ts",
+        "coverage": "full",
+        "note": "FRESH-FILE-SET EMULATION, last run 2026-10-19 on the working tree of the 19 October 2026 QA fixes, before this note and the results file were rewritten to record it: the file set git would commit — `git ls-files` + untracked-not-ignored, 89 files, no node_modules, no outputs/run — copied to an empty directory, `npm ci --offline` (115 packages) then `npm test` on Node 22.23.1: 29 mocha passing, 22 PASS + 1 capture-origin FLAG, PROVABLY FAIR — Full Pass, REPRODUCED, exit 0, about 23 s, and the SHA-256 of the five pinned artifacts and the RTP claim table unchanged afterwards. (First run 2026-09-25: 92 files, 113 packages, 24 mocha passing.) test:full: `npm run simulate` writes to outputs/run/ and verify field-diffs it against the pin (ATOL 1e-14 + RTOL 1e-12, runtime recorded in outputs/run/diff.json) — the 2026-09-25 regeneration reproduced all 57,126 leaves. README/MANIFEST step counts = 23 = the suite; audit ID PF-2026-DL03; engines node 22.x + .nvmrc. NOT run: a real `git clone` of the released commit, and `npm ci` against the registry (offline cache only)"
+      },
+      {
+        "id": "KENO-29",
+        "artifact": "tests/mutations.json + scripts/mutate.mjs",
+        "coverage": "full",
+        "note": "step-named mutation registry (53 entries, all killed across two runs: the last full run, 2026-10-14, covered the 49 entries then in the registry, 49/49 killed, 23/23 scored steps covered; the four exit-5 entries MC3a/MC3as/MC3b/MC3bs added after it ran 2026-10-15 with every Step 17 entry, --only M17,MC3, 7/7 killed; 53 = 49 + 4, not one run) run in a disposable copy by `npm run mutate`; every scored step has at least one killing mutation (the runner's coverage gate reads the scored steps from the baseline run); each entry carries an `expect` marker so the intended step fires; forged-evidence entries included (a re-pinned doctored dataset with the pre-flight abort disabled, a forged simulation scalar, a byte-only change to a pinned artifact). No declared survivors"
+      },
+      {
+        "id": "KENO-30",
+        "artifact": "MANIFEST.md#limitations-and-trust + MANIFEST.md#evidence",
+        "coverage": "full",
+        "note": "MANIFEST carries the declared-limitations register (DL-1 … DL-11, with the resolved item PV-1 in the release history) with measured magnitudes and closure evidence, and the load-bearing premises K1–K6 with what each assumes; MANIFEST Evidence numbers every exhibit E01–E15 with its role and names E12's real file; no internal QA folder ships"
+      },
+      {
+        "id": "KENO-32",
+        "artifact": "MANIFEST.md (DL-2)",
+        "coverage": "partial",
+        "note": "Duel offers Autopick (E01) and the capture never used it: every pick set was generated by the capture rig (randomPositions, Math.random) and no field records Autopick use. Disclosed as DL-2, not passed. Classified CAPTURED BEFORE THE STANDARD — closing it needs a capture that records Autopick use, which decision-12 rules out"
+      }
+    ]
   }
 }

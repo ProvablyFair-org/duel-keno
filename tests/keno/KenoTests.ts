@@ -199,6 +199,12 @@ describe('Cryptographic Core — Full Dataset Verification (all bets — proves 
     }
     assert.strictEqual(mismatches, 0, `${mismatches} hash mismatches out of ${checked}`);
     assert.ok(checked > 0, 'must have revealed seeds');
+
+    // seeds[0].seed.serverSeed is a post-capture copy of seeds[1]'s reveal, not a captured value
+    // (see buildSeedMap in src/loader.ts). Pin it so the exception cannot drift.
+    assert.strictEqual(ds.seeds[0].revealedFrom, undefined);
+    assert.strictEqual(ds.seeds[0].seed.serverSeed, ds.seeds[1].seed.serverSeed);
+    assert.strictEqual(ds.seeds[1].revealedFrom?.transactionId, 518502617);
   });
 
 });
@@ -285,4 +291,50 @@ describe('Payout Accuracy — confirms the platform paid the correct amount for 
     }
   });
 
+});
+
+// ── The operator's own Verify-tab code (profile KENO-09) ──────────────────────
+
+describe('Operator source — Duel\'s own Keno Verify-tab code, executed unmodified (evidence/verify-tab, copied 2026-09-25)', () => {
+  // duel.com → Provably Fair → Verify (Keno) → Expand → Copy, saved verbatim (src/operator-verifier.ts)
+  const { runOperatorVerifier, checkOperatorCites, OPERATOR_VERIFIER_PINS, OPERATOR_VERIFIER_FILE, OPERATOR_EXPECTED_LOGS } =
+    require('../../src/operator-verifier') as typeof import('../../src/operator-verifier');
+  const known = VECTORS.map((v, i) => ({ id: `known${i}`, serverSeed: v.serverSeed, clientSeed: v.clientSeed, nonce: v.nonce, gridSize: 40, drawnCount: 10 }));
+  const captured = ds.bets.map((b, i) => ({ id: `bet${i}`, serverSeed: seedMap.get(b.seed.serverSeedHashed) ?? '',
+    clientSeed: b.seed.clientSeed, nonce: b.seed.nonce, gridSize: 40, drawnCount: 10 }));
+  const run = runOperatorVerifier([...known, ...captured]);
+  const sorted = (a: number[]): number[] => [...a].sort((x, y) => x - y);
+
+  it('the vendored operator file and its runner hash to their pins, the code ran, and it printed only its empty-input message', () => {
+    assert.deepStrictEqual(run.files.map(f => f.match), [true, true]);
+    assert.strictEqual(run.files[0].file, OPERATOR_VERIFIER_FILE);
+    assert.strictEqual(run.files[0].actual, OPERATOR_VERIFIER_PINS[OPERATOR_VERIFIER_FILE]);
+    assert.strictEqual(run.error, null);
+    assert.deepStrictEqual(run.logs, [...OPERATOR_EXPECTED_LOGS]);
+  });
+
+  it('every operator line src/rng.ts cites carries the quoted text verbatim', () => {
+    const c = checkOperatorCites();
+    assert.deepStrictEqual(c.bad, []);
+    assert.ok(c.checked > 0);
+  });
+
+  it('fixed vectors: the operator code returns the 7 known-answer drawn sets above, and src/rng.ts\'s shuffle order', () => {
+    VECTORS.forEach((v, i) => {
+      const got = run.drawn!.get(`known${i}`)!;
+      assert.deepStrictEqual(sorted(got), [...v.expectedDrawnSet], `nonce=${v.nonce}`);
+      assert.deepStrictEqual(got, computeDraw(v.serverSeed, v.clientSeed, v.nonce), `order, nonce=${v.nonce}`);
+    });
+  });
+
+  it('every captured bet: the operator draw equals src/rng.ts in order and the served drawn_numbers as a set', () => {
+    const bad: string[] = [];
+    ds.bets.forEach((b, i) => {
+      const got = run.drawn!.get(`bet${i}`);
+      const mine = computeDraw(captured[i].serverSeed, b.seed.clientSeed, b.seed.nonce);
+      if (!got || got.join(',') !== mine.join(',') || sorted(got).join(',') !== sorted(b.response.drawn_numbers).join(',')) bad.push(String(b.response.id));
+    });
+    assert.deepStrictEqual(bad.slice(0, 5), []);
+    assert.strictEqual(ds.bets.length, 5100);
+  });
 });

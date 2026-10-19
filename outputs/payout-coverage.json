@@ -1,0 +1,613 @@
+{
+  "configs": 40,
+  "minBetsPerConfig": 50,
+  "betsPerConfig": {
+    "HIGH|8": 73,
+    "HIGH|2": 101,
+    "MEDIUM|3": 98,
+    "LOW|8": 87,
+    "MEDIUM|8": 78,
+    "MEDIUM|9": 98,
+    "LOW|7": 126,
+    "HIGH|5": 101,
+    "HIGH|4": 98,
+    "MEDIUM|5": 88,
+    "LOW|9": 89,
+    "CLASSIC|8": 87,
+    "MEDIUM|7": 99,
+    "HIGH|6": 100,
+    "LOW|6": 88,
+    "CLASSIC|3": 96,
+    "CLASSIC|5": 85,
+    "CLASSIC|4": 104,
+    "HIGH|7": 96,
+    "CLASSIC|6": 81,
+    "LOW|2": 101,
+    "HIGH|3": 95,
+    "MEDIUM|6": 92,
+    "HIGH|9": 99,
+    "CLASSIC|7": 81,
+    "MEDIUM|4": 82,
+    "LOW|5": 92,
+    "CLASSIC|2": 95,
+    "LOW|4": 95,
+    "LOW|3": 102,
+    "MEDIUM|2": 102,
+    "CLASSIC|9": 91,
+    "CLASSIC|1": 259,
+    "HIGH|1": 269,
+    "LOW|1": 247,
+    "MEDIUM|1": 225,
+    "LOW|10": 263,
+    "HIGH|10": 260,
+    "MEDIUM|10": 327,
+    "CLASSIC|10": 250
+  },
+  "totalPayoutCells": 260,
+  "cellsExercisedByLivePlay": 190,
+  "cellsNeverExercised": 70,
+  "uncoveredRtpShareOfTotal": 0.14922729108267638,
+  "note": "A payout cell is one (risk, picks, hits) entry of the committed kenoConfig.json multiplier table. `cellsNeverExercised` are the entries no captured bet ever landed on, so this dataset does not confirm their multipliers directly; `uncoveredRtpShareOfTotal` is the fraction of summed theoretical RTP that rests on them. Step 17 covers the full table analytically, against hypergeometric probabilities derived independently of the operator config.",
+  "uncoveredCells": [
+    {
+      "risk": "HIGH",
+      "picks": 3,
+      "hits": 3,
+      "probability": 0.012145748987854251,
+      "multiplier": 82.251,
+      "rtpContribution": 0.9990000000000001
+    },
+    {
+      "risk": "HIGH",
+      "picks": 4,
+      "hits": 4,
+      "probability": 0.002297844403107561,
+      "multiplier": 261,
+      "rtpContribution": 0.5997373892110734
+    },
+    {
+      "risk": "HIGH",
+      "picks": 7,
+      "hits": 5,
+      "probability": 0.005879778325598759,
+      "multiplier": 90.5,
+      "rtpContribution": 0.5321199384666877
+    },
+    {
+      "risk": "HIGH",
+      "picks": 5,
+      "hits": 4,
+      "probability": 0.009574351679614837,
+      "multiplier": 48.5,
+      "rtpContribution": 0.46435605646131956
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 6,
+      "hits": 5,
+      "probability": 0.001969580916949338,
+      "multiplier": 182,
+      "rtpContribution": 0.3584637268847795
+    },
+    {
+      "risk": "HIGH",
+      "picks": 8,
+      "hits": 6,
+      "probability": 0.0011878340051714666,
+      "multiplier": 275,
+      "rtpContribution": 0.3266543514221533
+    },
+    {
+      "risk": "HIGH",
+      "picks": 8,
+      "hits": 5,
+      "probability": 0.013303740857920425,
+      "multiplier": 20.1,
+      "rtpContribution": 0.2674051912442006
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 4,
+      "hits": 4,
+      "probability": 0.002297844403107561,
+      "multiplier": 102,
+      "rtpContribution": 0.23438012911697123
+    },
+    {
+      "risk": "LOW",
+      "picks": 4,
+      "hits": 4,
+      "probability": 0.002297844403107561,
+      "multiplier": 91.5,
+      "rtpContribution": 0.21025276288434183
+    },
+    {
+      "risk": "HIGH",
+      "picks": 9,
+      "hits": 6,
+      "probability": 0.0031180642635750995,
+      "multiplier": 57,
+      "rtpContribution": 0.17772966302378068
+    },
+    {
+      "risk": "HIGH",
+      "picks": 5,
+      "hits": 5,
+      "probability": 0.0003829740671845935,
+      "multiplier": 460,
+      "rtpContribution": 0.17616807090491302
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 5,
+      "hits": 5,
+      "probability": 0.0003829740671845935,
+      "multiplier": 395,
+      "rtpContribution": 0.15127475653791445
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 8,
+      "hits": 5,
+      "probability": 0.013303740857920425,
+      "multiplier": 11.1,
+      "rtpContribution": 0.1476715235229167
+    },
+    {
+      "risk": "HIGH",
+      "picks": 7,
+      "hits": 6,
+      "probability": 0.0003379182945746413,
+      "multiplier": 410,
+      "rtpContribution": 0.13854650077560293
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 7,
+      "hits": 6,
+      "probability": 0.0003379182945746413,
+      "multiplier": 405,
+      "rtpContribution": 0.13685690930272973
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 5,
+      "hits": 4,
+      "probability": 0.009574351679614837,
+      "multiplier": 14.1,
+      "rtpContribution": 0.13499835868256918
+    },
+    {
+      "risk": "LOW",
+      "picks": 5,
+      "hits": 5,
+      "probability": 0.0003829740671845935,
+      "multiplier": 305,
+      "rtpContribution": 0.11680709049130102
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 7,
+      "hits": 5,
+      "probability": 0.005879778325598759,
+      "multiplier": 15,
+      "rtpContribution": 0.08819667488398139
+    },
+    {
+      "risk": "LOW",
+      "picks": 7,
+      "hits": 6,
+      "probability": 0.0003379182945746413,
+      "multiplier": 230,
+      "rtpContribution": 0.0777212077521675
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 4,
+      "hits": 4,
+      "probability": 0.002297844403107561,
+      "multiplier": 23,
+      "rtpContribution": 0.05285042127147391
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 9,
+      "hits": 6,
+      "probability": 0.0031180642635750995,
+      "multiplier": 16,
+      "rtpContribution": 0.04988902821720159
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 9,
+      "hits": 6,
+      "probability": 0.0031180642635750995,
+      "multiplier": 15.5,
+      "rtpContribution": 0.048329996085414044
+    },
+    {
+      "risk": "LOW",
+      "picks": 8,
+      "hits": 6,
+      "probability": 0.0011878340051714666,
+      "multiplier": 40,
+      "rtpContribution": 0.04751336020685866
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 6,
+      "hits": 6,
+      "probability": 0.0000547105810263705,
+      "multiplier": 750,
+      "rtpContribution": 0.04103293576977787
+    },
+    {
+      "risk": "HIGH",
+      "picks": 6,
+      "hits": 6,
+      "probability": 0.0000547105810263705,
+      "multiplier": 750,
+      "rtpContribution": 0.04103293576977787
+    },
+    {
+      "risk": "LOW",
+      "picks": 6,
+      "hits": 6,
+      "probability": 0.0000547105810263705,
+      "multiplier": 710,
+      "rtpContribution": 0.038844512528723056
+    },
+    {
+      "risk": "HIGH",
+      "picks": 10,
+      "hits": 7,
+      "probability": 0.0005747583895990967,
+      "multiplier": 64,
+      "rtpContribution": 0.03678453693434219
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 6,
+      "hits": 5,
+      "probability": 0.001969580916949338,
+      "multiplier": 17,
+      "rtpContribution": 0.03348287558813874
+    },
+    {
+      "risk": "HIGH",
+      "picks": 8,
+      "hits": 7,
+      "probability": 0.00004681119232202823,
+      "multiplier": 620,
+      "rtpContribution": 0.029022939239657503
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 8,
+      "hits": 6,
+      "probability": 0.0011878340051714666,
+      "multiplier": 23,
+      "rtpContribution": 0.027320182118943732
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 8,
+      "hits": 7,
+      "probability": 0.00004681119232202823,
+      "multiplier": 450,
+      "rtpContribution": 0.021065036544912704
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 9,
+      "hits": 7,
+      "probability": 0.0001909018936882714,
+      "multiplier": 110,
+      "rtpContribution": 0.020999208305709855
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 10,
+      "hits": 7,
+      "probability": 0.0005747583895990967,
+      "multiplier": 27,
+      "rtpContribution": 0.01551847651917561
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 5,
+      "hits": 5,
+      "probability": 0.0003829740671845935,
+      "multiplier": 37,
+      "rtpContribution": 0.01417004048582996
+    },
+    {
+      "risk": "HIGH",
+      "picks": 10,
+      "hits": 8,
+      "probability": 0.00002309297101067799,
+      "multiplier": 600,
+      "rtpContribution": 0.013855782606406793
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 7,
+      "hits": 6,
+      "probability": 0.0003379182945746413,
+      "multiplier": 32,
+      "rtpContribution": 0.010813385426388522
+    },
+    {
+      "risk": "LOW",
+      "picks": 9,
+      "hits": 7,
+      "probability": 0.0001909018936882714,
+      "multiplier": 55,
+      "rtpContribution": 0.010499604152854928
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 10,
+      "hits": 7,
+      "probability": 0.0005747583895990967,
+      "multiplier": 18,
+      "rtpContribution": 0.01034565101278374
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 9,
+      "hits": 7,
+      "probability": 0.0001909018936882714,
+      "multiplier": 45,
+      "rtpContribution": 0.008590585215972214
+    },
+    {
+      "risk": "LOW",
+      "picks": 10,
+      "hits": 7,
+      "probability": 0.0005747583895990967,
+      "multiplier": 14,
+      "rtpContribution": 0.008046617454387353
+    },
+    {
+      "risk": "HIGH",
+      "picks": 7,
+      "hits": 7,
+      "probability": 0.000006436538944278882,
+      "multiplier": 900,
+      "rtpContribution": 0.005792885049850994
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 7,
+      "hits": 7,
+      "probability": 0.000006436538944278882,
+      "multiplier": 850,
+      "rtpContribution": 0.00547105810263705
+    },
+    {
+      "risk": "LOW",
+      "picks": 7,
+      "hits": 7,
+      "probability": 0.000006436538944278882,
+      "multiplier": 800,
+      "rtpContribution": 0.005149231155423106
+    },
+    {
+      "risk": "LOW",
+      "picks": 8,
+      "hits": 7,
+      "probability": 0.00004681119232202823,
+      "multiplier": 110,
+      "rtpContribution": 0.005149231155423106
+    },
+    {
+      "risk": "HIGH",
+      "picks": 9,
+      "hits": 8,
+      "probability": 0.000004937117940213916,
+      "multiplier": 1000,
+      "rtpContribution": 0.004937117940213916
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 8,
+      "hits": 7,
+      "probability": 0.00004681119232202823,
+      "multiplier": 60,
+      "rtpContribution": 0.002808671539321694
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 6,
+      "hits": 6,
+      "probability": 0.0000547105810263705,
+      "multiplier": 50,
+      "rtpContribution": 0.002735529051318525
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 9,
+      "hits": 8,
+      "probability": 0.000004937117940213916,
+      "multiplier": 550,
+      "rtpContribution": 0.0027154148671176535
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 10,
+      "hits": 8,
+      "probability": 0.00002309297101067799,
+      "multiplier": 110,
+      "rtpContribution": 0.002540226811174579
+    },
+    {
+      "risk": "LOW",
+      "picks": 9,
+      "hits": 8,
+      "probability": 0.000004937117940213916,
+      "multiplier": 300,
+      "rtpContribution": 0.0014811353820641747
+    },
+    {
+      "risk": "LOW",
+      "picks": 10,
+      "hits": 8,
+      "probability": 0.00002309297101067799,
+      "multiplier": 60,
+      "rtpContribution": 0.0013855782606406793
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 10,
+      "hits": 8,
+      "probability": 0.00002309297101067799,
+      "multiplier": 55,
+      "rtpContribution": 0.0012701134055872895
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 8,
+      "hits": 8,
+      "probability": 5.851399040253529e-7,
+      "multiplier": 1000,
+      "rtpContribution": 0.0005851399040253529
+    },
+    {
+      "risk": "HIGH",
+      "picks": 8,
+      "hits": 8,
+      "probability": 5.851399040253529e-7,
+      "multiplier": 1000,
+      "rtpContribution": 0.0005851399040253529
+    },
+    {
+      "risk": "LOW",
+      "picks": 8,
+      "hits": 8,
+      "probability": 5.851399040253529e-7,
+      "multiplier": 850,
+      "rtpContribution": 0.00049736891842155
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 7,
+      "hits": 7,
+      "probability": 0.000006436538944278882,
+      "multiplier": 70,
+      "rtpContribution": 0.00045055772609952174
+    },
+    {
+      "risk": "HIGH",
+      "picks": 10,
+      "hits": 9,
+      "probability": 3.5391526453146347e-7,
+      "multiplier": 1000,
+      "rtpContribution": 0.00035391526453146347
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 9,
+      "hits": 8,
+      "probability": 0.000004937117940213916,
+      "multiplier": 65,
+      "rtpContribution": 0.0003209126661139045
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 10,
+      "hits": 9,
+      "probability": 3.5391526453146347e-7,
+      "multiplier": 600,
+      "rtpContribution": 0.00021234915871887807
+    },
+    {
+      "risk": "LOW",
+      "picks": 10,
+      "hits": 9,
+      "probability": 3.5391526453146347e-7,
+      "multiplier": 300,
+      "rtpContribution": 0.00010617457935943904
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 8,
+      "hits": 8,
+      "probability": 5.851399040253529e-7,
+      "multiplier": 100,
+      "rtpContribution": 0.000058513990402535286
+    },
+    {
+      "risk": "HIGH",
+      "picks": 9,
+      "hits": 9,
+      "probability": 3.6571244001584556e-8,
+      "multiplier": 1200,
+      "rtpContribution": 0.00004388549280190147
+    },
+    {
+      "risk": "LOW",
+      "picks": 9,
+      "hits": 9,
+      "probability": 3.6571244001584556e-8,
+      "multiplier": 1100,
+      "rtpContribution": 0.00004022836840174301
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 9,
+      "hits": 9,
+      "probability": 3.6571244001584556e-8,
+      "multiplier": 1100,
+      "rtpContribution": 0.00004022836840174301
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 10,
+      "hits": 9,
+      "probability": 3.5391526453146347e-7,
+      "multiplier": 100,
+      "rtpContribution": 0.00003539152645314635
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 9,
+      "hits": 9,
+      "probability": 3.6571244001584556e-8,
+      "multiplier": 100,
+      "rtpContribution": 0.0000036571244001584554
+    },
+    {
+      "risk": "LOW",
+      "picks": 10,
+      "hits": 10,
+      "probability": 1.1797175484382116e-9,
+      "multiplier": 1200,
+      "rtpContribution": 0.0000014156610581258539
+    },
+    {
+      "risk": "MEDIUM",
+      "picks": 10,
+      "hits": 10,
+      "probability": 1.1797175484382116e-9,
+      "multiplier": 1200,
+      "rtpContribution": 0.0000014156610581258539
+    },
+    {
+      "risk": "HIGH",
+      "picks": 10,
+      "hits": 10,
+      "probability": 1.1797175484382116e-9,
+      "multiplier": 1200,
+      "rtpContribution": 0.0000014156610581258539
+    },
+    {
+      "risk": "CLASSIC",
+      "picks": 10,
+      "hits": 10,
+      "probability": 1.1797175484382116e-9,
+      "multiplier": 200,
+      "rtpContribution": 2.3594350968764231e-7
+    }
+  ]
+}

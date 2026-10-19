@@ -7,5 +7,15 @@ outputs/*.json
 .DS_Store
 .browser-profile/
 
+# artifacts of record — the verifier scores a run against these
+!outputs/verification-results.json
+!outputs/determinism-log.json
+!outputs/chi-squared-results.json
+!outputs/payout-coverage.json
+!outputs/simulation-results.json
+
 # run products — this verifier writes them fresh each run; the committed artifacts are pinned
 outputs/run/
+!outputs/rtp-claim-table.json
+# informational, not scored: npm run live-config (src/live-config.ts), MANIFEST E14
+!outputs/live-config-scaling.json

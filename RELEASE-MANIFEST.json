@@ -1,0 +1,71 @@
+{
+  "auditId": "PF-2026-DL03",
+  "game": "keno",
+  "casino": "duel",
+  "release": "v1.1.0",
+  "framework": "1.1",
+  "simulation": {
+    "seeding": "pinned",
+    "seedSource": "src/sim-seeds.ts SIM_SEEDS (40 server/client pairs, one per configuration)",
+    "attestation": "npm test scores the committed, pinned outputs/simulation-results.json without re-running the simulation; npm run test:full re-runs it into outputs/run/ and the verifier field-diffs it against the committed artifact at the reproduction tolerance (outputs/run/diff.json)"
+  },
+  "runtime": {
+    "command": "npm test",
+    "measured": [
+      {
+        "date": "2026-09-28",
+        "machine": "Apple M2 Max",
+        "cores": 12,
+        "node": "22.23.1",
+        "wallSeconds": 18.864,
+        "by": "time npm test"
+      }
+    ]
+  },
+  "datasetSha256": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9",
+  "artifacts": {
+    "data/keno-master-5100bets.json": "841755fdfb268d7796017212f08a18bfea7615c30a4590dd29793b34c5e6bcf9",
+    "kenoConfig.json": "efd3c645c4b3956199fde62dd65446c08e4605763d2d0f34c97a226bdbae4f91",
+    "outputs/chi-squared-results.json": "2af4ae85b381b8eebca9e7ab664b49f412a50f75e8646c2c205538d66a3e6e13",
+    "outputs/determinism-log.json": "081193bc8e2965dd7f4bf1b82b2bd232ba2cedb5783f9cd1b96111218500604b",
+    "outputs/payout-coverage.json": "e627bc8bc49ff0f8efb0a64a4516c9638c2af1de8f2e7842cd96ffcf0e5e8570",
+    "outputs/rtp-convergence.html": "3c34df21b9782760161f41d4c00fec420bb0bb0215774b2460d0ea3ea432d63d",
+    "outputs/simulation-results.json": "1401c862fb9a65639050ec8e704440cffc12485c96a4c3420c2c36d827d5ccfb",
+    "outputs/verification-results.json": "6cdedc560bf9efe082bdaf20ba4f87a3d57bd38aa9bf3217afd63f9736494bd4",
+    "outputs/rtp-claim-table.json": "01af5577a3032d467cd262fe4897705a6aa849f025b44f08283d35a1decceddb",
+    "evidence/keno-config-live-2026-10-05.json": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
+    "evidence/keno-config-live-2026-10-05.meta.json": "71a685bb12afab19a2acfb2177b4012be37840174a5e03c6ff2fcca4dbbf64da",
+    "outputs/live-config-scaling.json": "bd9107846ff27cc402580b7292497e861541f8598892dd231b8f5ba940af7953",
+    "evidence/keno-edge-claim-read-2026-10-05.md": "ac45a8142bb18a4f7a9ccad86e46585e840d87dc93be451bba9e7a1a8206780e"
+  },
+  "verdict": "PROVABLY FAIR — Full Pass",
+  "scored": {
+    "passed": 22,
+    "flags": 1,
+    "operatorFlags": 0,
+    "captureFlags": 1,
+    "hardFail": 0,
+    "of": 23
+  },
+  "capturedAt": {
+    "from": "2026-04-11T00:02:36.113Z",
+    "to": "2026-04-11T01:35:29.880Z"
+  },
+  "environment": {
+    "host": "duel.com",
+    "stage": "production",
+    "qualifier": null
+  },
+  "supersedes": "v1.0.0",
+  "signature": "SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY",
+  "falsifiability": {
+    "registry": "tests/mutations.json",
+    "runner": "scripts/mutate.mjs",
+    "mutations": 53,
+    "killed": 53,
+    "scoredStepsCovered": "23/23",
+    "declaredSurvivors": 0,
+    "source": "npm run mutate 2026-10-14 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the 49 entries then in the registry (baseline verify exit 0, mocha exit 0), on the tree carrying RTP-CLAIM 1.2.0 switched on with the tiered claim: 49/49 killed, 23/23 scored steps covered; the four C3 entries added after it, run 2026-10-15 with every Step 17 entry (--only M17,MC3): 7/7 killed, MC3a/MC3b exit 5; 53 = 49 + 4, not one run"
+  },
+  "pending": ""
+}

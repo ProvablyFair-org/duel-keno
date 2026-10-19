@@ -55,6 +55,11 @@ export function chiSquaredTest(
   return { chi2, df, pValue };
 }
 
+/** Upper tail P(χ²_df ≥ x), for a statistic computed outside chiSquaredTest (no pooling). */
+export function chiSquaredSurvival(x: number, df: number): number {
+  return 1 - regularizedGamma(df / 2, x / 2);
+}
+
 // ── Regularized incomplete gamma (exact) ──────────────────────────────────────
 
 /**
@@ -143,6 +148,9 @@ export interface RunsTestResult {
   expected: number;
   z: number;
   pValue: number;
+  /** The split point and the count at or above it — shipped so the verifier can re-derive z / p. */
+  median: number;
+  n1: number;
 }
 
 export function runsTest(series: number[]): RunsTestResult {
@@ -163,7 +171,40 @@ export function runsTest(series: number[]): RunsTestResult {
   const varRuns   = (2 * n1 * n2 * (2 * n1 * n2 - n)) / (n * n * (n - 1));
   const z         = varRuns > 0 ? (runs - expected) / Math.sqrt(varRuns) : 0;
   const pValue    = 2 * (1 - normalCDF(Math.abs(z)));
-  return { runs, expected, z, pValue };
+  return { runs, expected, z, pValue, median: med, n1 };
+}
+
+/**
+ * Wald-Wolfowitz runs z / p from (n, n1, runs) — the same formula runsTest applies, exported so
+ * the verifier re-derives the Pass 1 serial statistics from the shipped integers (KENO-20).
+ */
+export function runsFromCounts(n: number, n1: number, runs: number): { expected: number; z: number; pValue: number } {
+  const n2 = n - n1;
+  const expected  = (2 * n1 * n2) / n + 1;
+  const varRuns   = (2 * n1 * n2 * (2 * n1 * n2 - n)) / (n * n * (n - 1));
+  const z         = varRuns > 0 ? (runs - expected) / Math.sqrt(varRuns) : 0;
+  const pValue    = 2 * (1 - normalCDF(Math.abs(z)));
+  return { expected, z, pValue };
+}
+
+/** The median quickMedian computes, from a histogram of small non-negative integers (value = index). */
+export function medianFromHistogram(counts: number[]): number {
+  const n = counts.reduce((a, c) => a + c, 0);
+  const mid = Math.floor(n / 2);
+  let cum = 0;
+  let min = counts.findIndex(c => c > 0);
+  for (let v = min; v < counts.length; v++) {
+    cum += counts[v];
+    if (n % 2 === 1) { if (cum > mid) return v; }
+    else {
+      if (cum === mid) {
+        for (let w = v + 1; w < counts.length; w++) if (counts[w] > 0) return (v + w) / 2;
+        return v;
+      }
+      if (cum > mid) return v;
+    }
+  }
+  return min;
 }
 
 /** O(n) median via counting sort — optimal for small-integer series (hit counts 0–40). */
@@ -205,4 +246,24 @@ function erf(x: number): number {
   const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t
     - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
   return Math.sign(x) * y;
+}
+
+// ── Binomial survival ─────────────────────────────────────────────────────────
+
+/**
+ * P(X >= k) for X ~ Binomial(n, p). The same log-space summation src/simulate.ts uses to score
+ * its Pass 2 tests, exported so the verifier can RE-SCORE those tests from the raw per-combination
+ * rows rather than trust the verdict scalar the simulator wrote.
+ */
+export function binomSurvival(k: number, n: number, p: number): number {
+  let cdf = 0;
+  for (let i = 0; i < k; i++) cdf += binomPMF(i, n, p);
+  return 1 - cdf;
+}
+
+function binomPMF(k: number, n: number, p: number): number {
+  let logP = 0;
+  for (let i = 0; i < k; i++) logP += Math.log(n - i) - Math.log(i + 1);
+  logP += k * Math.log(p) + (n - k) * Math.log(1 - p);
+  return Math.exp(logP);
 }

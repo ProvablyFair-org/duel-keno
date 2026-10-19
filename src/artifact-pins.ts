@@ -6,19 +6,34 @@
  * verifier reporting PROVABLY FAIR — Full Pass, exit 0. A published artifact that nothing can
  * distinguish from a rewritten one is not evidence.
  *
- * outputs/verification-results.json is deliberately NOT pinned — it is this verifier's own
- * output and is rewritten on every run by construction.
+ * Every file here is TRACKED in git — a pin on an ignored file would be a pin on nothing.
  *
- * Regenerating an artifact legitimately means re-pinning it here, in the same commit, with the
- * run that produced it.
+ * outputs/verification-results.json is deliberately NOT pinned. It is this verifier's own output
+ * and it carries Step 21's own verdict, so a pin on it would be a pin on itself; the reproduction
+ * gate in tests/verify.ts scores it field by field against a fresh run instead, which is the
+ * stronger check — a forged copy cannot be made to pass by re-pinning it.
+ *
+ * Regenerating an artifact legitimately (`PF_EMIT=1 npm run verify`, or `PF_EMIT=1 npm run
+ * simulate`) means re-pinning it here, in the same commit, with the run that produced it.
+ *
+ * rtp-convergence.html RE-PINNED 2026-09-28 (previous pin f978eeaa…): Chart.js 4.4.7 is inlined verbatim
+ * instead of loaded from cdn.jsdelivr.net. Regenerated with `PF_EMIT=1 npm run simulate`;
+ * simulation-results.json came back byte-identical (574f961b…) and the html diff is the one <script> tag.
+ *
+ * simulation-results.json RE-PINNED 2026-10-19 (previous pin 574f961b…): the Pass 1 description no longer
+ * says "Validates independent implementation" (the draw code is ported from Duel's Verify-tab code,
+ * decision-19). Regenerated with `PF_EMIT=1 npm run simulate`; the diff is that one description string,
+ * and rtp-convergence.html came back byte-identical (3c34df21…).
  */
 export const ARTIFACT_PINS: Readonly<Record<string, string>> = Object.freeze({
   'chi-squared-results.json':
-    '193f866e271c26c3ff578209d7ac2c06bdc3c6b6a05c882e015ddcfee617c03f',
+    '2af4ae85b381b8eebca9e7ab664b49f412a50f75e8646c2c205538d66a3e6e13',
   'determinism-log.json':
-    '89362ed920cc452b6dd322bd49eab3889e4099083d91aac5e0d9314319cbeadc',
+    '081193bc8e2965dd7f4bf1b82b2bd232ba2cedb5783f9cd1b96111218500604b',
+  'payout-coverage.json':
+    'e627bc8bc49ff0f8efb0a64a4516c9638c2af1de8f2e7842cd96ffcf0e5e8570',
   'rtp-convergence.html':
-    'f978eeaa55b168a6c400e9f05f4de7490942a796e05f6d9bb4f9aa5f872297de',
+    '3c34df21b9782760161f41d4c00fec420bb0bb0215774b2460d0ea3ea432d63d',
   'simulation-results.json':
-    '78931bc5e73239b97ac3525be9eb9964d79d7911b3e1123d3573a0a850dc86b3',
+    '1401c862fb9a65639050ec8e704440cffc12485c96a4c3420c2c36d827d5ccfb',
 });
