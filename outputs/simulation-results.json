@@ -1,11 +1,11 @@
 {
   "pass1_fresh_seeds": {
-    "description": "Auditor-generated random seeds. Exercises the draw code ported from Duel's published Verify-tab code, the multiplier tables, and serial independence of RNG outputs.",
+    "description": "Auditor-generated random seeds. Exercises the draw code rebuilt from the written spec docs/ALGORITHM.md (Duel's Verify-tab code is a second check, not the source), the multiplier tables, and serial independence of RNG outputs.",
     "roundsPerConfig": 1000000,
     "totalRounds": 40000000,
     "configs": 40,
     "avgTheoreticalRTP": 0.999,
-    "avgSimulatedRTP": 0.9997041044329074,
+    "avgSimulatedRTP": 0.9997041599329073,
     "chi2FailsAtAlpha01": 0,
     "chi2FailsBonferroni": 0,
     "serialIndependenceFails": 0,
@@ -761,9 +761,9 @@
           250172,
           249161,
           249907,
-          250074,
+          250075,
           250390,
-          250048,
+          250047,
           249323,
           249941,
           250146,
@@ -772,10 +772,10 @@
           250109
         ],
         "uniformity": {
-          "chi2": 36.09757600000001,
-          "correctedChi2": 46.926848800000016,
+          "chi2": 36.09779200000002,
+          "correctedChi2": 46.92712960000003,
           "df": 39,
-          "pValue": 0.17945758530908051
+          "pValue": 0.17945022824069845
         },
         "serial": {
           "pairSum": 5068049,
@@ -1127,11 +1127,11 @@
         "picks": 4,
         "rounds": 1000000,
         "theoreticalRTP": 0.999,
-        "simulatedRTP": 0.9943902752949599,
+        "simulatedRTP": 0.9943924952949599,
         "hitCounts": [
           299664,
-          444466,
-          214385,
+          444465,
+          214386,
           39228,
           2257
         ],
@@ -1142,18 +1142,18 @@
           39391.61833898676,
           2297.844403107561
         ],
-        "chi2": 1.82449343039591,
+        "chi2": 1.8253303800492575,
         "df": 4,
-        "pValue": 0.7679982121647245,
-        "r1": -0.00016636356705480217,
-        "r1Z": -0.16636356705480215,
+        "pValue": 0.7678448893943326,
+        "r1": -0.00016491657217560565,
+        "r1Z": -0.16491657217560565,
         "runsZ": -0.4597572093785569,
         "runsPValue": 0.6456905411370824,
         "numberCounts": [
           250112,
           250755,
           249660,
-          249421,
+          249422,
           249759,
           249703,
           250018,
@@ -1181,7 +1181,7 @@
           249868,
           250137,
           249924,
-          249420,
+          249419,
           250377,
           250322,
           250591,
@@ -1192,13 +1192,13 @@
           249918
         ],
         "uniformity": {
-          "chi2": 26.162128000000006,
-          "correctedChi2": 34.01076640000001,
+          "chi2": 26.162144000000005,
+          "correctedChi2": 34.01078720000001,
           "df": 39,
-          "pValue": 0.6965748616391747
+          "pValue": 0.6965739607376474
         },
         "serial": {
-          "pairSum": 999778,
+          "pairSum": 999781,
           "first": 2,
           "last": 2,
           "runs": 419539,
@@ -3533,8 +3533,8 @@
       {
         "roundsPerConfig": 1000000,
         "label": "1M",
-        "meanRTP": 0.9997041044329074,
-        "stdDev": 0.0009242986481107068
+        "meanRTP": 0.9997041599329073,
+        "stdDev": 0.0009242904684157961
       }
     ]
   },

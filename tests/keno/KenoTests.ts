@@ -295,14 +295,24 @@ describe('Payout Accuracy — confirms the platform paid the correct amount for 
 
 // ── The operator's own Verify-tab code (profile KENO-09) ──────────────────────
 
-describe('Operator source — Duel\'s own Keno Verify-tab code, executed unmodified (evidence/verify-tab, copied 2026-09-25)', () => {
+describe('Second check — Duel\'s own Keno Verify-tab code, executed unmodified (evidence/verify-tab, copied 2026-09-25; not the source of src/rng.ts)', () => {
   // duel.com → Provably Fair → Verify (Keno) → Expand → Copy, saved verbatim (src/operator-verifier.ts)
-  const { runOperatorVerifier, checkOperatorCites, OPERATOR_VERIFIER_PINS, OPERATOR_VERIFIER_FILE, OPERATOR_EXPECTED_LOGS } =
+  const { runOperatorVerifier, OPERATOR_VERIFIER_PINS, OPERATOR_VERIFIER_FILE, OPERATOR_EXPECTED_LOGS } =
     require('../../src/operator-verifier') as typeof import('../../src/operator-verifier');
   const known = VECTORS.map((v, i) => ({ id: `known${i}`, serverSeed: v.serverSeed, clientSeed: v.clientSeed, nonce: v.nonce, gridSize: 40, drawnCount: 10 }));
   const captured = ds.bets.map((b, i) => ({ id: `bet${i}`, serverSeed: seedMap.get(b.seed.serverSeedHashed) ?? '',
     clientSeed: b.seed.clientSeed, nonce: b.seed.nonce, gridSize: 40, drawnCount: 10 }));
-  const run = runOperatorVerifier([...known, ...captured]);
+  // Off the captured data (MANIFEST "Where the draw code comes from", divergence 1): four inputs found by search
+  // whose step-8 (range 32) first chunk lies in [2^32 - 32, 2^32), where Duel's ceiling (2^32 - 32) rejects and
+  // the specification's (2^32) accepts. Searched 20 Oct 2026; no captured bet is in this window.
+  const POW2_WINDOW = [
+    { serverSeed: '977de0db49ef6efbc8b08a3e8cd263125a2210071212f38f63871315e1f87a72', clientSeed: 'pfPow2Search0', nonce: 11641204, sameSet: true },
+    { serverSeed: 'c6012798a6a2b3d470661cc7cdb710ed5af0aa3fa72e3beb7b62b4e1ec8afb4f', clientSeed: 'pfPow2Search7', nonce: 1863803, sameSet: false },
+    { serverSeed: 'c6012798a6a2b3d470661cc7cdb710ed5af0aa3fa72e3beb7b62b4e1ec8afb4f', clientSeed: 'pfPow2Search7', nonce: 11310783, sameSet: true },
+    { serverSeed: 'a0d42963b7fd7c67e01b01ff61a6acda79f8261650d646898df5c0dedad68c25', clientSeed: 'pfPow2Search0', nonce: 20200357, sameSet: false },
+  ];
+  const pow2 = POW2_WINDOW.map((v, i) => ({ id: `pow2_${i}`, serverSeed: v.serverSeed, clientSeed: v.clientSeed, nonce: v.nonce, gridSize: 40, drawnCount: 10 }));
+  const run = runOperatorVerifier([...known, ...captured, ...pow2]);
   const sorted = (a: number[]): number[] => [...a].sort((x, y) => x - y);
 
   it('the vendored operator file and its runner hash to their pins, the code ran, and it printed only its empty-input message', () => {
@@ -311,12 +321,6 @@ describe('Operator source — Duel\'s own Keno Verify-tab code, executed unmodif
     assert.strictEqual(run.files[0].actual, OPERATOR_VERIFIER_PINS[OPERATOR_VERIFIER_FILE]);
     assert.strictEqual(run.error, null);
     assert.deepStrictEqual(run.logs, [...OPERATOR_EXPECTED_LOGS]);
-  });
-
-  it('every operator line src/rng.ts cites carries the quoted text verbatim', () => {
-    const c = checkOperatorCites();
-    assert.deepStrictEqual(c.bad, []);
-    assert.ok(c.checked > 0);
   });
 
   it('fixed vectors: the operator code returns the 7 known-answer drawn sets above, and src/rng.ts\'s shuffle order', () => {
@@ -336,5 +340,16 @@ describe('Operator source — Duel\'s own Keno Verify-tab code, executed unmodif
     });
     assert.deepStrictEqual(bad.slice(0, 5), []);
     assert.strictEqual(ds.bets.length, 5100);
+  });
+
+  it('disclosed divergence off the captured data: on the range-32 rejection window Duel\'s ceiling differs from the spec\'s (2 of 4 searched inputs draw a different set)', () => {
+    const { createHmac } = require('crypto') as typeof import('crypto');
+    POW2_WINDOW.forEach((v, i) => {
+      const chunk0 = createHmac('sha256', Buffer.from(v.serverSeed, 'hex')).update(`${v.clientSeed}:${v.nonce}:8`).digest().readUInt32BE(0);
+      assert.ok(chunk0 >= 2 ** 32 - 32, `input ${i}: step-8 first chunk ${chunk0} is not in the window`);
+      const duel = run.drawn!.get(`pow2_${i}`)!;
+      const mine = computeDraw(v.serverSeed, v.clientSeed, v.nonce);
+      assert.strictEqual(sorted(duel).join(',') === sorted(mine).join(','), v.sameSet, `input ${i}: Duel [${duel}] vs src/rng.ts [${mine}]`);
+    });
   });
 });

@@ -12,9 +12,10 @@
  *
  * A THIRD verifier is the operator's own: (c) Duel's Keno Verify-tab code (duel.com → Provably Fair →
  * Verify → Expand → Copy, copied verbatim 2026-09-25 to evidence/verify-tab/, pinned in
- * src/operator-verifier.ts; profile KENO-09). It is EXECUTED unmodified on every bet; its draw, in the
- * shuffled order it returns, must equal src/rng.ts computeDraw's in the same order, and as a set the
- * served drawn_numbers; every operator line src/rng.ts cites must carry its quoted text.
+ * src/operator-verifier.ts; profile KENO-09). It is a SECOND CHECK, not the source of src/rng.ts (which
+ * is rebuilt from docs/ALGORITHM.md by an implementer who never opened Duel's code). It is EXECUTED
+ * unmodified on every bet; its draw, in the shuffled order it returns, must equal src/rng.ts
+ * computeDraw's in the same order, and as a set the served drawn_numbers.
  *
  * SCORED: the DRAWN SET each verifier prints must equal the draw this package recomputed (Step 5,
  * and so the draw the casino served) on every bet; the docs-site verifier's paytables.js must equal
@@ -37,7 +38,7 @@ import { displayMultiplier } from '../../src/money';
 import { loadSiteVerifier, SITE_VERIFIER_PROVENANCE } from '../../src/site-verifier';
 import { runLiveSiteVerifier, LIVE_SITE_PROVENANCE } from '../../src/live-site-verifier';
 import {
-  runOperatorVerifier, checkOperatorCites, OPERATOR_EXPECTED_LOGS, OPERATOR_VERIFIER_PROVENANCE,
+  runOperatorVerifier, OPERATOR_EXPECTED_LOGS, OPERATOR_VERIFIER_PROVENANCE,
 } from '../../src/operator-verifier';
 import { GRID_SIZE, DRAWN_COUNT } from '../../src/rng';
 
@@ -120,7 +121,6 @@ export function run(ctx: VerifyContext): StepResult[] {
     opRounds.push({ id: String(i), serverSeed: ss, clientSeed: b.seed.clientSeed, nonce: b.seed.nonce, gridSize: GRID_SIZE, drawnCount: DRAWN_COUNT });
   }
   const op = runOperatorVerifier(opRounds);
-  const opCites = checkOperatorCites();
   let opChecked = 0, opOrderVsRng = 0, opSetVsServed = 0, opMissing = 0;
   const opExamples: string[] = [];
   if (op.error || !op.drawn) {
@@ -150,7 +150,6 @@ export function run(ctx: VerifyContext): StepResult[] {
       issues.push(`operator Verify-tab code disagrees: in order with src/rng.ts on ${opOrderVsRng}, as a set with the served draw on ${opSetVsServed} bet(s) (${opExamples.join('; ')})`);
     }
   }
-  if (opCites.bad.length > 0 || opCites.checked === 0) issues.push(`src/rng.ts operator citations: ${opCites.bad.slice(0, 2).join('; ')}`);
 
   const ok = issues.length === 0;
   return [step(23, 'Player-Verifier Parity (docs-site + live-site)',
@@ -164,7 +163,7 @@ export function run(ctx: VerifyContext): StepResult[] {
         + `prints no Keno multiplier. Duel's own Keno Verify-tab code (${OPERATOR_VERIFIER_PROVENANCE.savedAs}, copied `
         + `${OPERATOR_VERIFIER_PROVENANCE.copiedOn}, SHA-256-pinned) executed unmodified on ${opChecked} of ${EXPECTED_BETS} bets returns `
         + `src/rng.ts's draw in the same shuffled order on every bet and the served draw as a set on every bet `
-        + `(${opOrderVsRng} / ${opSetVsServed} differ); operator lines cited by src/rng.ts ${opCites.checked - opCites.bad.length}/${opCites.checked} verbatim.`
+        + `(${opOrderVsRng} / ${opSetVsServed} differ). Duel's code is a second check; src/rng.ts is rebuilt from docs/ALGORITHM.md.`
       : `Player-verifier parity failed: ${issues.join('; ')}`,
     { siteFiles: site.files, siteChecked, siteDrawMismatches: siteDrawMismatch, siteThrew,
       sitePaytableCellsCompared: tableCellsCompared, sitePaytableCellsDiffering: tableCellsDiffering,
@@ -172,7 +171,6 @@ export function run(ctx: VerifyContext): StepResult[] {
       liveFiles: live.files, liveChecked, liveDrawMismatches: liveDrawMismatch, liveMissing,
       liveStandInModules: live.standIns.length,
       operatorFiles: op.files, operatorProvenance: OPERATOR_VERIFIER_PROVENANCE, operatorChecked: opChecked,
-      operatorOrderDiffersFromRng: opOrderVsRng, operatorSetDiffersFromServed: opSetVsServed, operatorMissing: opMissing,
-      operatorCitesChecked: opCites.checked, operatorCitesBad: opCites.bad.length },
+      operatorOrderDiffersFromRng: opOrderVsRng, operatorSetDiffersFromServed: opSetVsServed, operatorMissing: opMissing },
   )];
 }

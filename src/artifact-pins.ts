@@ -21,9 +21,18 @@
  * simulation-results.json came back byte-identical (574f961b…) and the html diff is the one <script> tag.
  *
  * simulation-results.json RE-PINNED 2026-10-19 (previous pin 574f961b…): the Pass 1 description no longer
- * says "Validates independent implementation" (the draw code is ported from Duel's Verify-tab code,
+ * says "Validates independent implementation" (the draw code was then ported from Duel's Verify-tab code,
  * decision-19). Regenerated with `PF_EMIT=1 npm run simulate`; the diff is that one description string,
  * and rtp-convergence.html came back byte-identical (3c34df21…).
+ *
+ * simulation-results.json and rtp-convergence.html RE-PINNED 2026-10-20 (v1.2.0, clean-room src/rng.ts; previous
+ * pins 1401c862… and 3c34df21…). Regenerated with `PF_EMIT=1 npm run simulate`. The Pass 1 description now says
+ * the draw code is rebuilt from docs/ALGORITHM.md. Two of the 40,000,000 Pass 1 rounds drew a different set
+ * (config 8 nonce 261486, config 13 nonce 628473): in each, the step-8 (range 32) first chunk is in
+ * [2^32 − 32, 2^32), which the port (Duel's ceiling, 2^32 − 32) rejected and the rebuilt module (the spec's
+ * ceiling, 2^32) accepts. The fields of configs 8 and 13 that depend on those two rounds, Pass 1's
+ * avgSimulatedRTP and convergence[6] moved; Pass 2 and every other field are unchanged. The chart's data line
+ * moved with them. chi-squared-results.json, determinism-log.json and payout-coverage.json are byte-identical.
  */
 export const ARTIFACT_PINS: Readonly<Record<string, string>> = Object.freeze({
   'chi-squared-results.json':
@@ -33,7 +42,7 @@ export const ARTIFACT_PINS: Readonly<Record<string, string>> = Object.freeze({
   'payout-coverage.json':
     'e627bc8bc49ff0f8efb0a64a4516c9638c2af1de8f2e7842cd96ffcf0e5e8570',
   'rtp-convergence.html':
-    '3c34df21b9782760161f41d4c00fec420bb0bb0215774b2460d0ea3ea432d63d',
+    'ceb2f732a43da4439fa36af88c33f79acf177e50cb9309d06ceafaf98616e77f',
   'simulation-results.json':
-    '1401c862fb9a65639050ec8e704440cffc12485c96a4c3420c2c36d827d5ccfb',
+    'c8543cce21bef6707099b0f29676abe2712fdb3ce0c85f46e3c9a014f12f0de7',
 });

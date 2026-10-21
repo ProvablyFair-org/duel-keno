@@ -717,7 +717,7 @@
         "totalRounds": 40000000,
         "configs": 40,
         "rows": 40,
-        "avgSimulatedRTP": 0.9997041044329074,
+        "avgSimulatedRTP": 0.9997041599329073,
         "alpha": 0.01,
         "bonferroniAlpha": 0.00025,
         "chi2FailsBonferroni": 0,
@@ -819,14 +819,14 @@
       "step": 22,
       "name": "Draw Bias Bound (rejection ceiling, every range enumerated)",
       "status": "PASS",
-      "detail": "All 39 ranges the backward shuffle uses (40 … 2) enumerated over all 2^32 chunk values with the draw's own maxFair: on every range the accepted count is a whole multiple of the range, so each index is selected by exactly the same number of values — bias exactly 0 (profile floor 2^-32). Largest rejection: 32 of 2^32 values at range 32 (maxFair 0xFFFFFFE0). Rejection census over the 5100 recomputed draws: 0 chunk(s) rejected, 0 cursor advance(s), 198900 chunks accepted = 39 × 5100.",
+      "detail": "All 39 ranges the backward shuffle uses (40 … 2) enumerated over all 2^32 chunk values with the draw's own maxFair: on every range the accepted count is a whole multiple of the range, so each index is selected by exactly the same number of values — bias exactly 0 (profile floor 2^-32). Largest rejection: 22 of 2^32 values at range 39 (maxFair 0xFFFFFFEA). Rejection census over the 5100 recomputed draws: 0 chunk(s) rejected, 0 cursor advance(s), 198900 chunks accepted = 39 × 5100.",
       "data": {
         "rangesEnumerated": 39,
         "nonExactRanges": 0,
         "rangesBeyond2pow32": 0,
-        "largestRejection": 32,
-        "largestRejectionRange": 32,
-        "expectedRejectedChunksPerDraw": 8.381903171539307e-8,
+        "largestRejection": 22,
+        "largestRejectionRange": 39,
+        "expectedRejectedChunksPerDraw": 6.938353180885315e-8,
         "census": {
           "hmacCalls": 198900,
           "chunksScanned": 198900,
@@ -909,11 +909,11 @@
           },
           {
             "range": 32,
-            "maxFair": 4294967264,
-            "accepted": "4294967264",
-            "rejected": 32,
+            "maxFair": 4294967296,
+            "accepted": "4294967296",
+            "rejected": 0,
             "biasNum": "0",
-            "biasDen": "137438952448",
+            "biasDen": "137438953472",
             "exact": true
           },
           {
@@ -1053,11 +1053,11 @@
           },
           {
             "range": 16,
-            "maxFair": 4294967280,
-            "accepted": "4294967280",
-            "rejected": 16,
+            "maxFair": 4294967296,
+            "accepted": "4294967296",
+            "rejected": 0,
             "biasNum": "0",
-            "biasDen": "68719476480",
+            "biasDen": "68719476736",
             "exact": true
           },
           {
@@ -1125,11 +1125,11 @@
           },
           {
             "range": 8,
-            "maxFair": 4294967288,
-            "accepted": "4294967288",
-            "rejected": 8,
+            "maxFair": 4294967296,
+            "accepted": "4294967296",
+            "rejected": 0,
             "biasNum": "0",
-            "biasDen": "34359738304",
+            "biasDen": "34359738368",
             "exact": true
           },
           {
@@ -1161,11 +1161,11 @@
           },
           {
             "range": 4,
-            "maxFair": 4294967292,
-            "accepted": "4294967292",
-            "rejected": 4,
+            "maxFair": 4294967296,
+            "accepted": "4294967296",
+            "rejected": 0,
             "biasNum": "0",
-            "biasDen": "17179869168",
+            "biasDen": "17179869184",
             "exact": true
           },
           {
@@ -1179,11 +1179,11 @@
           },
           {
             "range": 2,
-            "maxFair": 4294967294,
-            "accepted": "4294967294",
-            "rejected": 2,
+            "maxFair": 4294967296,
+            "accepted": "4294967296",
+            "rejected": 0,
             "biasNum": "0",
-            "biasDen": "8589934588",
+            "biasDen": "8589934592",
             "exact": true
           }
         ]
@@ -1203,7 +1203,7 @@
       "step": 23,
       "name": "Player-Verifier Parity (docs-site + live-site)",
       "status": "PASS",
-      "detail": "Both player verifiers executed from their pinned bytes on all 5100 bets: the docs-site derive.js (mikepforg/pf-audit-duel @ bd4d59c) and the live https://www.provablyfair.org/verify-bets bundle each print the drawn set this package recomputes on every bet; the docs-site paytables.js equals the pinned kenoConfig.json on 260 of 260 cells and the multiplier it prints equals the served one on 5100 of 5100 bets. The live page prints no Keno multiplier. Duel's own Keno Verify-tab code (evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js, copied 2026-09-25, SHA-256-pinned) executed unmodified on 5100 of 5100 bets returns src/rng.ts's draw in the same shuffled order on every bet and the served draw as a set on every bet (0 / 0 differ); operator lines cited by src/rng.ts 18/18 verbatim.",
+      "detail": "Both player verifiers executed from their pinned bytes on all 5100 bets: the docs-site derive.js (mikepforg/pf-audit-duel @ bd4d59c) and the live https://www.provablyfair.org/verify-bets bundle each print the drawn set this package recomputes on every bet; the docs-site paytables.js equals the pinned kenoConfig.json on 260 of 260 cells and the multiplier it prints equals the served one on 5100 of 5100 bets. The live page prints no Keno multiplier. Duel's own Keno Verify-tab code (evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js, copied 2026-09-25, SHA-256-pinned) executed unmodified on 5100 of 5100 bets returns src/rng.ts's draw in the same shuffled order on every bet and the served draw as a set on every bet (0 / 0 differ). Duel's code is a second check; src/rng.ts is rebuilt from docs/ALGORITHM.md.",
       "data": {
         "siteFiles": [
           {
@@ -1288,9 +1288,7 @@
         "operatorChecked": 5100,
         "operatorOrderDiffersFromRng": 0,
         "operatorSetDiffersFromServed": 0,
-        "operatorMissing": 0,
-        "operatorCitesChecked": 18,
-        "operatorCitesBad": 0
+        "operatorMissing": 0
       },
       "profileIds": [
         "KENO-24"
@@ -1354,9 +1352,9 @@
     "packageChecks": [
       {
         "id": "KENO-09",
-        "artifact": "tests/keno/KenoTests.ts (Operator source block) + src/rng.ts OPERATOR_SOURCE_CITES + src/operator-verifier.ts + Step 23",
+        "artifact": "docs/ALGORITHM.md + tests/keno/RngSpecTests.ts + tests/keno/KenoTests.ts (Second check block) + src/operator-verifier.ts + Step 23",
         "coverage": "full",
-        "note": "Duel publishes the draw source as the code panel of its Verify tab (E03 shows it collapsed). Paulo copied it verbatim on 2026-09-25 (duel.com → Provably Fair → Verify → Expand → Copy) to evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js (E13, SHA-256 b75c1ca2…), pinned with its runner in src/operator-verifier.ts. The asserts, each met: (1) \"unit tests reproduce captured bets from their revealed seeds … against the operator's published source\" — the Operator source block in tests/keno/KenoTests.ts EXECUTES that file unmodified on all 5,100 captured bets: its generateKenoDrawnNumbers returns src/rng.ts computeDraw's draw in the same shuffled order on 5,100/5,100 and the served drawn_numbers as a set on 5,100/5,100 (the served order is presentation-only: it equals the shuffle order on 0 of 5,100); (2) \"fixed vectors\" — the same block requires it to return the 7 known-answer drawn sets; (3) \"the adapter cites the operator source line it ports\" — src/rng.ts OPERATOR_SOURCE_CITES names 18 lines of the pinned file (L9 drawnCount … L85 1-indexed, shuffled order) with the text each must carry, and checkOperatorCites FAILs any that does not: 18/18. Step 23 runs the same execution and citation check in the verifier. FAIL probed: M23e (a logic line of the operator file changed AND re-pinned → disagreement), M23f (a byte changed without re-pin → hash mismatch), M23g (a citation moved to a line that does not carry its text). Not established: that the Verify button, or Duel's server, runs exactly this code"
+        "note": "REWRITTEN 2026-10-20 (v1.2.0). src/rng.ts is rebuilt from a written specification, docs/ALGORITHM.md (framework games/keno/ALGORITHM.md), by an implementer who never opened Duel's code; Duel's published Verify-tab code is run as a second check, not used as the source. Through v1.1.0 src/rng.ts was a port of that code and cited 18 of its lines (OPERATOR_SOURCE_CITES); the port and the citation table are gone. Duel publishes the draw code as the code panel of its Verify tab (E03 shows it collapsed); Paulo copied it verbatim on 2026-09-25 (duel.com → Provably Fair → Verify → Expand → Copy) to evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js (E13, SHA-256 b75c1ca2…), pinned with its runner in src/operator-verifier.ts. The asserts: (1) \"unit tests reproduce captured bets from their revealed seeds … against the operator's published source\" — the Second check block in tests/keno/KenoTests.ts EXECUTES that file unmodified on all 5,100 captured bets: its generateKenoDrawnNumbers returns src/rng.ts computeDraw's draw in the same shuffled order on 5,100/5,100 and the served drawn_numbers as a set on 5,100/5,100 (the served order is not the shuffle order: it equals it on 0 of 5,100, spec §2.3 / O1); (2) \"fixed vectors\" — the same block requires it to return the 7 known-answer drawn sets, and tests/keno/RngSpecTests.ts runs the spec's own vectors, Verify-page grids and properties against src/rng.ts (79/79); (3) \"the adapter cites the operator source line it ports\" — superseded for this package by the 20 Oct 2026 rule that RNG code is rebuilt from a written spec: nothing is ported, so no operator line is cited; docs/ALGORITHM.md §4 names the source of every step instead (Duel's public pages and Verify-page result grids, the standard construction, or the 5,100 live bets). Off the captured data the two differ in two places, both disclosed in MANIFEST.md: on the power-of-two ranges 2, 4, 8, 16, 32 Duel's ceiling is 2^32 − r and the spec's 2^32, and when all eight chunks of a step are rejected Duel hashes the next cursor while src/rng.ts throws (spec O2); neither occurred in the 198,900 captured shuffle steps. Step 23 runs the same execution in the verifier. FAIL probed: M23e (a logic line of the operator file changed AND re-pinned → disagreement), M23f (a byte changed without re-pin → hash mismatch), M23g (src/rng.ts returns its draw out of shuffle order → the in-order comparison with Duel's code fails; until v1.1.0 M23g broke a citation). Not established: that the Verify button, or Duel's server, runs exactly this code"
       },
       {
         "id": "KENO-22",
@@ -1386,7 +1384,7 @@
         "id": "KENO-29",
         "artifact": "tests/mutations.json + scripts/mutate.mjs",
         "coverage": "full",
-        "note": "step-named mutation registry (53 entries, all killed across two runs: the last full run, 2026-10-14, covered the 49 entries then in the registry, 49/49 killed, 23/23 scored steps covered; the four exit-5 entries MC3a/MC3as/MC3b/MC3bs added after it ran 2026-10-15 with every Step 17 entry, --only M17,MC3, 7/7 killed; 53 = 49 + 4, not one run) run in a disposable copy by `npm run mutate`; every scored step has at least one killing mutation (the runner's coverage gate reads the scored steps from the baseline run); each entry carries an `expect` marker so the intended step fires; forged-evidence entries included (a re-pinned doctored dataset with the pre-flight abort disabled, a forged simulation scalar, a byte-only change to a pinned artifact). No declared survivors"
+        "note": "step-named mutation registry (53 entries; last full run 2026-10-20 on the clean-room src/rng.ts, the whole registry in one run: 53/53 killed, 23/23 scored steps covered; M06, M22 and M22b retargeted to the same edits in the rebuilt module, M23g retargeted from the removed citation table to a draw returned out of shuffle order) run in a disposable copy by `npm run mutate`; every scored step has at least one killing mutation (the runner's coverage gate reads the scored steps from the baseline run); each entry carries an `expect` marker so the intended step fires; forged-evidence entries included (a re-pinned doctored dataset with the pre-flight abort disabled, a forged simulation scalar, a byte-only change to a pinned artifact). No declared survivors"
       },
       {
         "id": "KENO-30",

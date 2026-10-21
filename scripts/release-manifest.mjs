@@ -27,12 +27,12 @@ const DECLARED = {
   auditId: 'PF-2026-DL03',
   game: 'keno',
   casino: 'duel',
-  release: 'v1.1.0',
+  release: 'v1.2.0',
   framework: '1.1',
   environmentHost: 'duel.com',
   environmentStage: 'production',
   environmentQualifier: null,
-  supersedes: 'v1.0.0',
+  supersedes: 'v1.1.0',
   signature: 'SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY',
   pending: '',
 };
@@ -48,7 +48,7 @@ const SIMULATION = {
 const DATASET = 'data/keno-master-5100bets.json';
 
 /** Every file whose bytes the release is a claim about: the dataset, the pinned config (if any),
- * every artifact src/artifact-pins.ts pins and the informational E14 and E15 files. Order is the manifest's order. */
+ * every artifact src/artifact-pins.ts pins, E14 (the RTP claim's source) and the informational E15 file. Order is the manifest's order. */
 const ARTIFACTS = [
   DATASET,
   'kenoConfig.json',
@@ -60,13 +60,14 @@ const ARTIFACTS = [
   'outputs/simulation-results.json',
   'outputs/verification-results.json',
   'outputs/rtp-claim-table.json',   // RTP-CLAIM per-setting table (src/rtp-settings.ts pins it)
-  // informational, not scored (MANIFEST E14): the duel.com keno config as fetched 2026-10-05, its
-  // fetch record, and what `npm run live-config` (src/live-config.ts) computes from it
+  // MANIFEST E14: the duel.com keno config as fetched 2026-10-05 (the source of the tiered RTP claim
+  // src/rtp-settings.ts scores), its fetch record, and what `npm run live-config` (src/live-config.ts,
+  // informational, not scored) computes from it
   'evidence/keno-config-live-2026-10-05.json',
   'evidence/keno-config-live-2026-10-05.meta.json',
   'outputs/live-config-scaling.json',
   // informational, not scored (MANIFEST E15): the record of Duel's pages read 2026-10-05, the source
-  // of the RTP claim in src/rtp-settings.ts
+  // of the site-wide 99.9% line src/rtp-settings.ts records as noted, not tested (the claim until 14 Oct)
   'evidence/keno-edge-claim-read-2026-10-05.md',
 ];
 
@@ -79,7 +80,7 @@ function captureWindow(dataset) {
 /** The falsifiability battery. `mutations` is computed from the registry; the RUN RESULT is DECLARED
  * from the last completed `npm run mutate` (cite it in `source`) and must be refreshed by re-running
  * the battery — a generator never asserts a kill it did not run. null = not run for this manifest. */
-const FALSIFIABILITY_DECLARED = { killed: 53, scoredStepsCovered: '23/23', declaredSurvivors: 0, source: 'npm run mutate 2026-10-14 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the 49 entries then in the registry (baseline verify exit 0, mocha exit 0), on the tree carrying RTP-CLAIM 1.2.0 switched on with the tiered claim: 49/49 killed, 23/23 scored steps covered; the four C3 entries added after it, run 2026-10-15 with every Step 17 entry (--only M17,MC3): 7/7 killed, MC3a/MC3b exit 5; 53 = 49 + 4, not one run' };
+const FALSIFIABILITY_DECLARED = { killed: 53, scoredStepsCovered: '23/23', declaredSurvivors: 0, source: 'npm run mutate 2026-10-20 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry of 53 entries on the tree carrying the clean-room src/rng.ts (v1.2.0): 53/53 killed, 23/23 scored steps covered, MC3a/MC3b exit 5' };
 
 /** How long `npm test` takes, and on what — a property of the machine, so DECLARED from measured runs. */
 const RUNTIME = {

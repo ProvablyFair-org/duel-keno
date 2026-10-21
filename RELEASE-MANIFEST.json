@@ -2,7 +2,7 @@
   "auditId": "PF-2026-DL03",
   "game": "keno",
   "casino": "duel",
-  "release": "v1.1.0",
+  "release": "v1.2.0",
   "framework": "1.1",
   "simulation": {
     "seeding": "pinned",
@@ -29,9 +29,9 @@
     "outputs/chi-squared-results.json": "2af4ae85b381b8eebca9e7ab664b49f412a50f75e8646c2c205538d66a3e6e13",
     "outputs/determinism-log.json": "081193bc8e2965dd7f4bf1b82b2bd232ba2cedb5783f9cd1b96111218500604b",
     "outputs/payout-coverage.json": "e627bc8bc49ff0f8efb0a64a4516c9638c2af1de8f2e7842cd96ffcf0e5e8570",
-    "outputs/rtp-convergence.html": "3c34df21b9782760161f41d4c00fec420bb0bb0215774b2460d0ea3ea432d63d",
-    "outputs/simulation-results.json": "1401c862fb9a65639050ec8e704440cffc12485c96a4c3420c2c36d827d5ccfb",
-    "outputs/verification-results.json": "6cdedc560bf9efe082bdaf20ba4f87a3d57bd38aa9bf3217afd63f9736494bd4",
+    "outputs/rtp-convergence.html": "ceb2f732a43da4439fa36af88c33f79acf177e50cb9309d06ceafaf98616e77f",
+    "outputs/simulation-results.json": "c8543cce21bef6707099b0f29676abe2712fdb3ce0c85f46e3c9a014f12f0de7",
+    "outputs/verification-results.json": "4a99d37c94dca70b6a60d64d2790ca9e3fa32d5c11c0fb3201a027284f38611f",
     "outputs/rtp-claim-table.json": "01af5577a3032d467cd262fe4897705a6aa849f025b44f08283d35a1decceddb",
     "evidence/keno-config-live-2026-10-05.json": "787f9bad764a1cf5a8db9b7d166582b072c197a7ffd8eda6019d6c3817478d84",
     "evidence/keno-config-live-2026-10-05.meta.json": "71a685bb12afab19a2acfb2177b4012be37840174a5e03c6ff2fcca4dbbf64da",
@@ -56,7 +56,7 @@
     "stage": "production",
     "qualifier": null
   },
-  "supersedes": "v1.0.0",
+  "supersedes": "v1.1.0",
   "signature": "SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY",
   "falsifiability": {
     "registry": "tests/mutations.json",
@@ -65,7 +65,7 @@
     "killed": 53,
     "scoredStepsCovered": "23/23",
     "declaredSurvivors": 0,
-    "source": "npm run mutate 2026-10-14 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the 49 entries then in the registry (baseline verify exit 0, mocha exit 0), on the tree carrying RTP-CLAIM 1.2.0 switched on with the tiered claim: 49/49 killed, 23/23 scored steps covered; the four C3 entries added after it, run 2026-10-15 with every Step 17 entry (--only M17,MC3): 7/7 killed, MC3a/MC3b exit 5; 53 = 49 + 4, not one run"
+    "source": "npm run mutate 2026-10-20 (Apple M2 Max, 12 cores, node v22.23.1), one serial run of the whole registry of 53 entries on the tree carrying the clean-room src/rng.ts (v1.2.0): 53/53 killed, 23/23 scored steps covered, MC3a/MC3b exit 5"
   },
   "pending": ""
 }

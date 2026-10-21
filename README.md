@@ -1,6 +1,6 @@
 # Duel Keno — Provably Fair Audit
 
-**Auditor:** [ProvablyFair.org](https://www.provablyfair.org) · **Audit ID:** PF-2026-DL03 · **Release:** `v1.1.0` · **Capture:** 11 April 2026
+**Auditor:** [ProvablyFair.org](https://www.provablyfair.org) · **Audit ID:** PF-2026-DL03 · **Release:** `v1.2.0` · **Capture:** 11 April 2026
 
 **Result: PROVABLY FAIR — Full Pass for the captured configuration.** All 5,100 recorded draws and payouts reproduce. The verifier reports 22 passing steps, one disclosed capture-origin flag and no hard failures. The flag concerns two missed responses during capture retries; it does not identify an operator defect.
 
@@ -10,14 +10,14 @@
 
 | Check | Captured evidence |
 |---|---|
-| Draws | 5,100 of 5,100 drawn sets reproduced from server seed, client seed and nonce, with draw code ported from Duel's published Verify-tab code ([where it comes from](MANIFEST.md#commitment-inputs-and-shuffle)) |
+| Draws | 5,100 of 5,100 drawn sets reproduced from server seed, client seed and nonce. The RNG code (`src/rng.ts`) was rebuilt from a written specification ([docs/ALGORITHM.md](docs/ALGORITHM.md)) by an implementer who never opened Duel's code; Duel's published Verify-tab code is run as a second check, not used as the source ([where it comes from](MANIFEST.md#commitment-inputs-and-shuffle)) |
 | Payouts | 5,100 of 5,100 matched the captured paytable and exact settlement rule |
 | Seed records | 106 records; 102 bet-bearing epochs; revealed seeds and recorded commitment links checked |
 | Configurations | All 40 represented; 190 of 260 payout cells observed in live play |
 | Theoretical RTP | 99.9000% after rounding, calculated independently from the captured paytable |
 | Observed return | 91.3853% across the finite capture; reported separately from theoretical RTP |
 | Simulation evidence | 40 million Pass 1 rounds in total across 40 configurations, plus Pass 2 seed comparisons |
-| Player verification | Pinned operator and ProvablyFair.org verifier code checked against the captured draws |
+| Player verification | Duel's own Verify-tab code (the second check) and both ProvablyFair.org verifiers reproduce all 5,100 drawn sets |
 
 Hash matching and captured chronology establish consistency of the supplied records; they are not independent historical timestamp attestation. Coverage gaps, screenshot provenance and residual operator trust are retained in the [overview's limitations](MANIFEST.md#limitations-and-trust).
 
@@ -30,7 +30,7 @@ npm ci
 npm test
 ```
 
-Expected: **29 unit tests pass; 22 PASS + 1 capture-origin FLAG; zero hard failures; REPRODUCED; exit 0.** This replays every captured bet, checks the pinned evidence and compares fresh verification results with the committed artifacts. It scores the stored simulation and replays its specified sample windows; it does not rerun the full simulation. The exit code is the verdict: `0` PROVABLY FAIR — Full Pass · `2` PROVABLY FAIR — Conditional Pass · `5` RTP FIGURE OVERSTATED (the RTP-CLAIM rule 1.2.0 found a published RTP figure above the game's real RTP; the draws pass) · `1` NOT PROVABLY FAIR, or a reproduction difference.
+Expected: **30 unit tests pass; 22 PASS + 1 capture-origin FLAG; zero hard failures; REPRODUCED; exit 0.** This replays every captured bet, checks the pinned evidence and compares fresh verification results with the committed artifacts. It scores the stored simulation and replays its specified sample windows; it does not rerun the full simulation. The exit code is the verdict: `0` PROVABLY FAIR — Full Pass · `2` PROVABLY FAIR — Conditional Pass · `5` RTP FIGURE OVERSTATED (the RTP-CLAIM rule 1.2.0 found a published RTP figure above the game's real RTP; the draws pass) · `1` NOT PROVABLY FAIR, or a reproduction difference.
 
 **RTP claim (RTP-CLAIM 1.2.0, switched on).** Each of 2,712 rows (the 40 audited configurations and the 2,672 stake tiers of Duel's 5 October 2026 configuration) is held to the edge Duel's game settings state for its stake tier (claim kind `tiered`, 91 tiers from 0.1% to 1.0%). Scored on Step 17: PASS, 0 rows beyond the 0.1 pp band ([table](outputs/rtp-claim-table.json)). The help page's site-wide 99.9% line is noted, not tested.
 

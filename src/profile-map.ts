@@ -189,20 +189,30 @@ export const NOT_APPLICABLE: Array<{ id: string; reason: string }> = [
 ];
 
 export const PACKAGE_CHECKS: Array<{ id: string; artifact: string; coverage: 'full' | 'partial' | 'none'; note: string }> = [
-  { id: 'KENO-09', artifact: 'tests/keno/KenoTests.ts (Operator source block) + src/rng.ts OPERATOR_SOURCE_CITES + src/operator-verifier.ts + Step 23', coverage: 'full',
-    note: 'Duel publishes the draw source as the code panel of its Verify tab (E03 shows it collapsed). Paulo copied it verbatim on 2026-09-25 (duel.com → '
+  { id: 'KENO-09', artifact: 'docs/ALGORITHM.md + tests/keno/RngSpecTests.ts + tests/keno/KenoTests.ts (Second check block) + src/operator-verifier.ts + Step 23', coverage: 'full',
+    note: 'REWRITTEN 2026-10-20 (v1.2.0). src/rng.ts is rebuilt from a written specification, docs/ALGORITHM.md '
+      + '(framework games/keno/ALGORITHM.md), by an implementer who never opened Duel\'s code; Duel\'s published Verify-tab '
+      + 'code is run as a second check, not used as the source. Through v1.1.0 src/rng.ts was a port of that code and cited '
+      + '18 of its lines (OPERATOR_SOURCE_CITES); the port and the citation table are gone. Duel publishes the draw code as '
+      + 'the code panel of its Verify tab (E03 shows it collapsed); Paulo copied it verbatim on 2026-09-25 (duel.com → '
       + 'Provably Fair → Verify → Expand → Copy) to evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js (E13, SHA-256 '
-      + 'b75c1ca2…), pinned with its runner in src/operator-verifier.ts. The asserts, each met: (1) "unit tests reproduce '
-      + 'captured bets from their revealed seeds … against the operator\'s published source" — the Operator source block in '
+      + 'b75c1ca2…), pinned with its runner in src/operator-verifier.ts. The asserts: (1) "unit tests reproduce '
+      + 'captured bets from their revealed seeds … against the operator\'s published source" — the Second check block in '
       + 'tests/keno/KenoTests.ts EXECUTES that file unmodified on all 5,100 captured bets: its generateKenoDrawnNumbers returns '
       + 'src/rng.ts computeDraw\'s draw in the same shuffled order on 5,100/5,100 and the served drawn_numbers as a set on '
-      + '5,100/5,100 (the served order is presentation-only: it equals the shuffle order on 0 of 5,100); (2) "fixed vectors" — '
-      + 'the same block requires it to return the 7 known-answer drawn sets; (3) "the adapter cites the operator source line '
-      + 'it ports" — src/rng.ts OPERATOR_SOURCE_CITES names 18 lines of the pinned file (L9 drawnCount … L85 1-indexed, '
-      + 'shuffled order) with the text each must carry, and checkOperatorCites FAILs any that does not: 18/18. Step 23 runs the '
-      + 'same execution and citation check in the verifier. FAIL probed: M23e (a logic line of the operator file changed AND '
-      + 're-pinned → disagreement), M23f (a byte changed without re-pin → hash mismatch), M23g (a citation moved to a line '
-      + 'that does not carry its text). Not established: that the Verify button, or Duel\'s server, runs exactly this code' },
+      + '5,100/5,100 (the served order is not the shuffle order: it equals it on 0 of 5,100, spec §2.3 / O1); (2) "fixed '
+      + 'vectors" — the same block requires it to return the 7 known-answer drawn sets, and tests/keno/RngSpecTests.ts runs '
+      + 'the spec\'s own vectors, Verify-page grids and properties against src/rng.ts (79/79); (3) "the adapter cites the '
+      + 'operator source line it ports" — superseded for this package by the 20 Oct 2026 rule that RNG code is rebuilt from a '
+      + 'written spec: nothing is ported, so no operator line is cited; docs/ALGORITHM.md §4 names the source of every step '
+      + 'instead (Duel\'s public pages and Verify-page result grids, the standard construction, or the 5,100 live bets). Off the '
+      + 'captured data the two differ in two places, both disclosed in MANIFEST.md: on the power-of-two ranges 2, 4, 8, 16, 32 '
+      + 'Duel\'s ceiling is 2^32 − r and the spec\'s 2^32, and when all eight chunks of a step are rejected Duel hashes the next '
+      + 'cursor while src/rng.ts throws (spec O2); neither occurred in the 198,900 captured shuffle steps. Step 23 runs the same '
+      + 'execution in the verifier. FAIL probed: M23e (a logic line of the operator file changed AND re-pinned → disagreement), '
+      + 'M23f (a byte changed without re-pin → hash mismatch), M23g (src/rng.ts returns its draw out of shuffle order → the '
+      + 'in-order comparison with Duel\'s code fails; until v1.1.0 M23g broke a citation). Not established: that the Verify '
+      + 'button, or Duel\'s server, runs exactly this code' },
   { id: 'KENO-22', artifact: 'tests/steps/statistical.ts (informational context, never verdict-bearing)', coverage: 'full',
     note: 'drawn-number uniformity over all 51,000 captured numbers with the without-replacement correction (X²·39/30 ~ χ²₃₉), '
       + 'hit counts per picks count (10) and per (risk, picks) config (40) against the hypergeometric law; informational only' },
@@ -224,9 +234,9 @@ export const PACKAGE_CHECKS: Array<{ id: string; artifact: string; coverage: 'fu
       + '57,126 leaves. README/MANIFEST step counts = 23 = the suite; audit ID PF-2026-DL03; engines node 22.x + .nvmrc. '
       + 'NOT run: a real `git clone` of the released commit, and `npm ci` against the registry (offline cache only)' },
   { id: 'KENO-29', artifact: 'tests/mutations.json + scripts/mutate.mjs', coverage: 'full',
-    note: 'step-named mutation registry (53 entries, all killed across two runs: the last full run, 2026-10-14, covered the 49 '
-      + 'entries then in the registry, 49/49 killed, 23/23 scored steps covered; the four exit-5 entries MC3a/MC3as/MC3b/MC3bs '
-      + 'added after it ran 2026-10-15 with every Step 17 entry, --only M17,MC3, 7/7 killed; 53 = 49 + 4, not one run) run in '
+    note: 'step-named mutation registry (53 entries; last full run 2026-10-20 on the clean-room src/rng.ts, the whole '
+      + 'registry in one run: 53/53 killed, 23/23 scored steps covered; M06, M22 and M22b retargeted to the same edits in the '
+      + 'rebuilt module, M23g retargeted from the removed citation table to a draw returned out of shuffle order) run in '
       + 'a disposable copy by `npm run mutate`; every scored step has at least one killing '
       + 'mutation (the runner\'s coverage gate reads the scored steps from the baseline run); each entry carries an `expect` '
       + 'marker so the intended step fires; forged-evidence entries included (a re-pinned doctored dataset with the pre-flight '

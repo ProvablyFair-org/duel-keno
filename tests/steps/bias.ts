@@ -10,12 +10,14 @@
  * For each range r: A = maxFair(r) accepted values out of 2^32, R = 2^32 − A rejected. Each residue
  * j ∈ 0 … r−1 is hit by ⌊A/r⌋ or ⌈A/r⌉ accepted values, so the selection bias is exactly
  *   bias(r) = max_j |count_j / A − 1/r|,
- * computed here in integer arithmetic. Duel's ceiling makes A a whole multiple of r, so bias(r) = 0
- * on every range — exactly uniform, stronger than the profile's 2^-32 floor. The DECLARED property
- * is exactness (the rng.ts header calls the ceiling "bias-free"), so a non-zero bias on any range is
- * a FAIL even where it would sit under 2^-32: a naive `chunk % r` over all 2^32 values is biased by
- * 1.3970e-10 at r = 40 (24 / (40 · 2^32)) — under the 2^-32 ≈ 2.3283e-10 floor, and still not what the operator
- * publishes.
+ * computed here in integer arithmetic. The draw's ceiling (spec docs/ALGORITHM.md §2 Step 2:
+ * LIMIT = floor(2^32 / r) · r) makes A a whole multiple of r, so bias(r) = 0 on every range — exactly
+ * uniform, stronger than the profile's 2^-32 floor. The DECLARED property is exactness (the spec's
+ * rejection rule exists to remove modulo bias), so a non-zero bias on any range is a FAIL even where
+ * it would sit under 2^-32: a naive `chunk % r` over all 2^32 values is biased by 1.3970e-10 at r = 40
+ * (24 / (40 · 2^32)) — under the 2^-32 ≈ 2.3283e-10 floor, and still not what the spec states.
+ * (Duel's Verify-tab ceiling, 0xFFFFFFFF − (0xFFFFFFFF mod r), equals the spec's on the 34 ranges that
+ * are not powers of two and is r lower on 2, 4, 8, 16, 32; both are whole multiples of r.)
  *
  * REJECTION CENSUS. Step 5 tallies what the draw actually did while recomputing all 5,100 captured
  * bets: HMAC calls, chunks scanned, chunks rejected, cursor advances. Exactly one chunk is accepted

@@ -2,8 +2,9 @@
  * Two-pass Monte Carlo simulation for Duel.com Keno audit.
  *
  * Pass 1 — Fresh seeds (1 per config × 1,000,000 rounds × 40 configs = 40M rounds total).
- *   Exercises the draw code (src/rng.ts, PORTED from Duel's published Verify-tab code — not an
- *   independent implementation; see its header) and the multiplier tables.
+ *   Exercises the draw code (src/rng.ts, rebuilt from the written spec docs/ALGORITHM.md by an
+ *   implementer who never opened Duel's code; Duel's Verify-tab code is a second check, not the source)
+ *   and the multiplier tables.
  *   Includes chi-squared goodness-of-fit and serial independence (autocorrelation + runs test).
  *   The 40 seed pairs were generated once with crypto.randomBytes and are PINNED in src/sim-seeds.ts (SIM_SEEDS),
  *   so every figure this file writes is a deterministic function of the code, the pinned seeds, the
@@ -443,7 +444,7 @@ console.log(`  Time: ${(pass2ElapsedMs / 1000).toFixed(1)}s\n`);
 
 const output = {
   pass1_fresh_seeds: {
-    description: 'Auditor-generated random seeds. Exercises the draw code ported from Duel\'s published Verify-tab code, the multiplier tables, and serial independence of RNG outputs.',
+    description: 'Auditor-generated random seeds. Exercises the draw code rebuilt from the written spec docs/ALGORITHM.md (Duel\'s Verify-tab code is a second check, not the source), the multiplier tables, and serial independence of RNG outputs.',
     roundsPerConfig:    ROUNDS_PER_CONFIG,
     totalRounds:        ROUNDS_PER_CONFIG * allConfigs.length,
     configs:            allConfigs.length,
