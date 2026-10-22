@@ -1,6 +1,6 @@
 {
   "name": "keno-audit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Provably fair audit — Duel.com Keno",
   "engines": {
     "node": "22.x"

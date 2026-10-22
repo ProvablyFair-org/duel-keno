@@ -1,6 +1,6 @@
 # Duel Keno — Provably Fair Audit
 
-**Auditor:** [ProvablyFair.org](https://www.provablyfair.org) · **Audit ID:** PF-2026-DL03 · **Release:** `v1.2.0` · **Capture:** 11 April 2026
+**Auditor:** [ProvablyFair.org](https://www.provablyfair.org) · **Audit ID:** PF-2026-DL03 · **Release:** `v1.2.1` · **Capture:** 11 April 2026
 
 **Result: PROVABLY FAIR — Full Pass for the captured configuration.** All 5,100 recorded draws and payouts reproduce. The verifier reports 22 passing steps, one disclosed capture-origin flag and no hard failures. The flag concerns two missed responses during capture retries; it does not identify an operator defect.
 

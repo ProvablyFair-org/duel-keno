@@ -1,8 +1,8 @@
 # Duel Keno — Consolidated Audit Overview
 
-**Audit ID:** PF-2026-DL03 · **Auditor:** ProvablyFair.org · **Release:** `v1.2.0` · **Framework:** 1.1
+**Audit ID:** PF-2026-DL03 · **Auditor:** ProvablyFair.org · **Release:** `v1.2.1` · **Framework:** 1.1
 
-Original audit: March 2026. Dataset of record: recapture on **11 April 2026**, from `2026-04-11T00:02:36.113Z` to `2026-04-11T01:35:29.880Z`. Original publication: 4 June 2026. This revision is release `v1.2.0`, which rebuilds the draw code from a written specification; `v1.1.0` was the October 2026 re-certification. This overview consolidates the package documentation and records the publication corrections of 4 October 2026. The machine-readable release identity remains in [RELEASE-MANIFEST.json](RELEASE-MANIFEST.json).
+Original audit: March 2026. Dataset of record: recapture on **11 April 2026**, from `2026-04-11T00:02:36.113Z` to `2026-04-11T01:35:29.880Z`. Original publication: 4 June 2026. This revision is release `v1.2.1`, an errata release that adds `.gitattributes` to `v1.2.0`, which rebuilt the draw code from a written specification; `v1.1.0` was the October 2026 re-certification. This overview consolidates the package documentation and records the publication corrections of 4 October 2026. The machine-readable release identity remains in [RELEASE-MANIFEST.json](RELEASE-MANIFEST.json).
 
 ## Conclusion and scope
 
@@ -385,13 +385,17 @@ The phase-ordered live sample mixes different hit-count distributions; its aggre
 **RTP:** expected or observed return divided by stake; label which one is meant. **House edge:** one minus theoretical RTP. **Hit:** a selected number present in the draw. **Epoch:** one seed lifecycle; this capture records 50 bets per used epoch, with the disclosed retry exceptions. **Nonce:** round counter. **Cursor:** HMAC/shuffle counter. **Commit-reveal:** commit a hash, later disclose the seed for comparison. **Rejection sampling:** discard values outside the accepted interval. **Hypergeometric distribution:** hit-count probabilities for sampling without replacement. **Chi-squared test:** compare observed and expected counts. **Seed selection:** choosing among candidate server seeds before commitment; outcome replay alone does not test that choice.
 
 ## Release history
-The original report was published **4 June 2026**, with original March material and the April recapture. The supplied source package labels its expanded release **v1.1.0** (October 2026), superseding v1.0.0. Its recorded result remains **22 PASS, one capture-origin FLAG, zero hard failures across 23 steps**. The release `v1.1.0` and its signature (`SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY`) are recorded in the RELEASE-MANIFEST.json of the signed `v1.1.0` tag of ProvablyFair-org/duel-keno. This package's [release manifest](RELEASE-MANIFEST.json) describes `v1.2.0`.
+The original report was published **4 June 2026**, with original March material and the April recapture. The supplied source package labels its expanded release **v1.1.0** (October 2026), superseding v1.0.0. Its recorded result remains **22 PASS, one capture-origin FLAG, zero hard failures across 23 steps**. The release `v1.1.0` and its signature (`SHA256:gEujiJm2pRyq7lQsfYQfQ1r97H/J7GdaKHbOW8GtikY`) are recorded in the RELEASE-MANIFEST.json of the signed `v1.1.0` tag of ProvablyFair-org/duel-keno. This package's [release manifest](RELEASE-MANIFEST.json) describes `v1.2.1`.
 
 The expanded package adds draw-bias and player-verifier checks, release metadata and a mutation battery. Step 4 now exposes the same two capture-retry gaps as a capture-origin flag, without changing the verdict. The dataset remains byte-identical to the prior release. The RTP claim table holds every row of the audited table and of the 5 October 2026 configuration to the edge Duel's game settings state for its stake tier; since 14 October 2026 the rule is switched on and its outcome is scored on Step 17 (see the 14 October 2026 entries below).
 
 **PV-1 is closed.** On 25 September 2026, a stale local ProvablyFair.org docs-site build (`repotree-sync` at `2ad89bc`) differed from the audited table on **106/260 cells** and **1,472/5,100** captured multipliers. The site's main at `bd4d59c` carried the correct table: **0/260** cell differences, **0/5,100** multiplier differences, and **5,100/5,100** matching draw sets. Its bytes were vendored for Step 23. This was a local site-build finding, never an operator finding; deployment of the stale build to players was not established. On 5 October 2026 at 19:17 UTC the deployed docs-site verifier, audit.provablyfair.org/casino/duel/tools/verify-bets, was fetched read-only with its main bundle and all 26 chunks its runtime lists: the one chunk carrying a Keno paytable (`cacca72b.43f45f69.js`, SHA-256 `290d1304e931e6b64b9c08b4226edee8ee3ceac17a129b2006dc903c20f50ef4`) equals the audited table on 260/260 cells and differs from the stale `repotree-sync` table on 106/260, so the stale table was not being served there that day; earlier deployments were not checked.
 
 On **29 September 2026**, Chart.js **4.4.7** was inlined into the convergence chart from the lockfile-pinned npm package, removing its CDN dependency without changing chart figures. E10's **1 October** privacy masking and both image hashes are preserved in the evidence section above. The September evidence corrections distinguish the collapsed E03 panel from full source E13, and the March screenshot inputs from the April dataset.
+
+### 21 October 2026 — `.gitattributes` (v1.2.1, errata)
+
+- v1.2.1: adds `.gitattributes` (`* -text`) so a Windows git clone keeps every file byte-identical; no audit content changed.
 
 ### 21 October 2026 — review corrections (v1.2.0)
 
