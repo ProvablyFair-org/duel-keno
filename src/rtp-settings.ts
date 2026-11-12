@@ -8,8 +8,8 @@
  * carrying KENO-19, and a house-side miss makes the verdict RTP FIGURE OVERSTATED (exit 5), never
  * NOT PROVABLY FAIR.
  *
- * CLAIM. Kind 'tiered' (rule 1.2.0, decision D2; Mike, 14 October 2026: "D2: as written. The edge in
- * Duel's game settings counts, no screenshot needed."). The game settings — the duel.com Keno
+ * CLAIM. Kind 'tiered' (rule 1.2.0, Methodology v1.1, 14 October 2026: the edge stated in
+ * Duel's game settings counts as published, no screenshot needed). The game settings — the duel.com Keno
  * configuration E14 — state a house_edge for every stake tier of every (risk, picks) configuration
  * (scaling_edge, 91 distinct edges from 0.1% to 1.0%). Each row carries the tier it is priced at,
  * keyed by that stated edge ("house_edge=0.0021"), and is held to 1 − that edge within the band:

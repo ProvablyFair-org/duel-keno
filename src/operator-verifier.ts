@@ -11,7 +11,7 @@
  * draws. Through v1.1.0 src/rng.ts was a port of this file and, from 25 Sep 2026, cited 18 of its lines;
  * the port and that citation table were removed on 20 Oct 2026.
  *
- * PROVENANCE. Copied by Paulo from duel.com → Provably Fair → Verify (Keno) → Expand → Copy on
+ * PROVENANCE. Copied by ProvablyFair.org from duel.com → Provably Fair → Verify (Keno) → Expand → Copy on
  * 2026-09-25, and saved verbatim as evidence/verify-tab/duel-verify-tab-keno-2026-09-25.js
  * (3,138 bytes, 95 lines, file mtime 2026-09-25T13:36:08-03:00). The file is never edited. What this
  * does NOT establish: that the Verify button on the live page runs exactly the code its panel
